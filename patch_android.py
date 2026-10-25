@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Prépare le projet Android généré par Capacitor : signature fixe, numéro de version, couleur de fond.
+"""Prépare le projet Android généré par Capacitor : signature fixe, version, couleur de fond.
 
 Usage : python3 patch_android.py <dossier_android> <numero_de_build>
 """
 import json
 import os
 import re
+import shutil
 import sys
 
 android = os.path.abspath(sys.argv[1])
@@ -19,9 +20,28 @@ g = open(gradle_path, encoding="utf-8").read()
 # Numéro de version : chaque build est plus récent que le précédent (mise à jour par-dessus l'ancienne)
 g = re.sub(r"versionCode\s+\d+", "versionCode " + build, g, count=1)
 g = re.sub(r'versionName\s+"[^"]*"', 'versionName "1.0.' + build + '"', g, count=1)
+g = re.sub(
+    r"\bminSdkVersion\s+rootProject\.ext\.minSdkVersion",
+    "minSdkVersion 23",
+    g,
+    count=1,
+)
+
+# BiometricPrompt bridge used by the native PIN/biometric lock.
+if "androidx.biometric:biometric:" not in g:
+    g, n = re.subn(
+        r"(\ndependencies\s*\{)",
+        r'\1\n    implementation "androidx.biometric:biometric:1.1.0"',
+        g,
+        count=1,
+    )
+    if n != 1:
+        sys.exit("Bloc dependencies { introuvable dans app/build.gradle")
 
 # Signature fixe : l'APK se met à jour sans désinstaller (les données locales sont conservées)
 if "momo.keystore" not in g:
+    if not os.path.isfile(keystore):
+        sys.exit("momo.keystore absent : placez-le à la racine du dépôt (même fichier que pour l'APK déjà installé).")
     block = (
         "\n    signingConfigs {\n"
         "        debug {\n"
@@ -36,6 +56,56 @@ if "momo.keystore" not in g:
     if n != 1:
         sys.exit("Bloc android { introuvable dans build.gradle")
 open(gradle_path, "w", encoding="utf-8").write(g)
+
+# Enregistrement des fichiers Excel (sauvegardes) dans Documents/CabineMomo
+man_path = os.path.join(android, "app", "src", "main", "AndroidManifest.xml")
+man = open(man_path, encoding="utf-8").read()
+if "WRITE_EXTERNAL_STORAGE" not in man:
+    man = man.replace(
+        "</manifest>",
+        '    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />\n'
+        '    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />\n</manifest>',
+    )
+if "requestLegacyExternalStorage" not in man:
+    man = man.replace("<application", '<application android:requestLegacyExternalStorage="true"', 1)
+if "android.permission.USE_BIOMETRIC" not in man:
+    man = man.replace(
+        "</manifest>",
+        '    <uses-permission android:name="android.permission.USE_BIOMETRIC" />\n'
+        '    <uses-permission android:name="android.permission.USE_FINGERPRINT" android:maxSdkVersion="28" />\n</manifest>',
+    )
+open(man_path, "w", encoding="utf-8").write(man)
+
+# Sauvegarde Excel quotidienne de 23h59 : code Android natif (dossier native/ du dépôt)
+java_root = os.path.join(android, "app", "src", "main", "java")
+pkg_dir = None
+for dp, dn, fn in os.walk(java_root):
+    if "MainActivity.java" in fn:
+        pkg_dir = dp
+        break
+if pkg_dir is None:
+    pkg_dir = os.path.join(java_root, "com", "cabine", "momo")
+    os.makedirs(pkg_dir, exist_ok=True)
+native_dir = os.path.join(root, "native")
+for name in sorted(os.listdir(native_dir)):
+    if name.endswith(".java"):
+        shutil.copy(os.path.join(native_dir, name), os.path.join(pkg_dir, name))
+man = open(man_path, encoding="utf-8").read()
+for perm in ("RECEIVE_BOOT_COMPLETED", "SCHEDULE_EXACT_ALARM"):
+    if perm not in man:
+        man = man.replace("</manifest>", '    <uses-permission android:name="android.permission.%s" />\n</manifest>' % perm)
+if "com.cabine.momo.BackupReceiver" not in man:
+    man = man.replace(
+        "</application>",
+        '        <receiver android:name="com.cabine.momo.BackupReceiver" android:exported="true">\n'
+        "            <intent-filter>\n"
+        '                <action android:name="android.intent.action.BOOT_COMPLETED" />\n'
+        '                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />\n'
+        '                <action android:name="com.cabine.momo.BACKUP" />\n'
+        "            </intent-filter>\n"
+        "        </receiver>\n    </application>",
+    )
+open(man_path, "w", encoding="utf-8").write(man)
 
 # Couleur de fond de la WebView (évite un flash blanc au démarrage)
 cfg_path = os.path.join(os.path.dirname(android), "capacitor.config.json")

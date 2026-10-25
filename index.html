@@ -6,6 +6,7 @@
 <title>Cabine Momo</title>
 <meta name="theme-color" content="#06402b">
 <meta name="color-scheme" content="light dark">
+<script>try{if(localStorage.getItem("cabine_momo_pin_lock")==="1")document.documentElement.classList.add("lock-checking")}catch(e){}</script>
 <style>
 :root{--bg:#f6f7f9;--card:rgba(255,255,255,.88);--fld:rgba(255,255,255,.78);--tx:#14181f;--mu:#566070;--bd:rgba(20,24,31,.13);--ac:#0b7a4b;--onac:#fff;--ac2:#e3f4ec;--dg:#b3321f;--gold:#ffc83d;--dim:0;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -35,6 +36,7 @@ h1{font-size:20px;margin:0;letter-spacing:-.01em}
 .gear{width:44px;height:44px;padding:0;font-size:20px;border-radius:50%;flex:none;margin-left:auto;background:var(--card)}
 .chip{display:inline-block;max-width:100%;background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;color:var(--mu);margin:0 0 12px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 .chip:empty{display:none}
+#st{cursor:pointer}
 .brand{text-align:center;background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:22px 16px 18px;margin:8px 0 12px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 .brand svg{display:block;margin:0 auto 10px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
 .brand b{display:block;font-size:28px;font-weight:800;letter-spacing:-.02em}
@@ -76,6 +78,242 @@ h2{font-size:15px;margin:0 0 8px}.em{color:var(--mu);text-align:center;padding:8
 .wp[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 2px var(--ac)}
 .wpn{font-size:12px;text-align:center;color:var(--mu);margin-top:4px}
 @media (prefers-reduced-motion:reduce){button:active{transform:none}}
+/* ---- Direction visuelle : Cabine Momo, nette et mobile d'abord ---- */
+:root{
+  color-scheme:light;
+  --bg:#f3f6f2;
+  --card:#ffffff;
+  --fld:#f8faf8;
+  --tx:#17251e;
+  --mu:#68766e;
+  --bd:#e2e9e3;
+  --ac:#08734d;
+  --onac:#ffffff;
+  --ac2:#e8f4ed;
+  --dg:#b83d36;
+  --gold:#f3bd48;
+  --shadow:0 8px 24px rgba(27,55,39,.055);
+  --shadow-soft:0 2px 8px rgba(27,55,39,.045)
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]):not([data-theme="dark"]){
+    color-scheme:dark;
+    --bg:#111914;
+    --card:#1a241e;
+    --fld:#202c25;
+    --tx:#f1f5f1;
+    --mu:#a6b3aa;
+    --bd:#344139;
+    --ac:#39bd83;
+    --onac:#092519;
+    --ac2:#20372b;
+    --dg:#ff8a7b;
+    --gold:#f5ca68;
+    --shadow:0 10px 28px rgba(0,0,0,.18);
+    --shadow-soft:0 2px 8px rgba(0,0,0,.14)
+  }
+  :root:not([data-theme="light"]):not([data-theme="dark"]) #bg::after{opacity:max(var(--dim),.28)}
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111914;
+  --card:#1a241e;
+  --fld:#202c25;
+  --tx:#f1f5f1;
+  --mu:#a6b3aa;
+  --bd:#344139;
+  --ac:#39bd83;
+  --onac:#092519;
+  --ac2:#20372b;
+  --dg:#ff8a7b;
+  --gold:#f5ca68;
+  --shadow:0 10px 28px rgba(0,0,0,.18);
+  --shadow-soft:0 2px 8px rgba(0,0,0,.14)
+}
+:root[data-theme="dark"] #bg::after{opacity:max(var(--dim),.28)}
+body{
+  background:var(--bg);
+  color:var(--tx);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased
+}
+#bg{z-index:0}
+main{position:relative;z-index:1;max-width:680px;padding:22px 18px 44px}
+h1{font-size:21px;font-weight:750;letter-spacing:-.035em;line-height:1.2}
+h2{font-size:15px;font-weight:720;letter-spacing:-.015em;margin:0 0 10px}
+.top{
+  gap:13px;
+  margin:0 0 12px;
+  padding:13px 15px;
+  border:1px solid var(--bd);
+  border-radius:18px;
+  background:var(--card);
+  box-shadow:var(--shadow-soft);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none
+}
+.top.bare{background:transparent;border-color:transparent;box-shadow:none;padding:0 2px;margin:0 0 8px}
+.logo{
+  width:46px;height:46px;border-radius:15px;
+  background:linear-gradient(145deg,#0c895b,#075438);
+  color:#fff;font-size:15px;font-weight:800;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.24)
+}
+.sub{font-size:12px;color:var(--mu);margin-top:3px}
+.gear{
+  width:44px;height:44px;border-radius:14px;margin-left:auto;
+  background:var(--fld);border:1px solid var(--bd);
+  box-shadow:none;font-size:18px
+}
+.chip{
+  display:block;width:fit-content;max-width:100%;
+  padding:8px 12px;margin:0 0 15px;
+  color:var(--mu);background:var(--card);
+  border:1px solid var(--bd);border-radius:12px;
+  box-shadow:var(--shadow-soft);backdrop-filter:none;-webkit-backdrop-filter:none;
+  font-size:12px;line-height:1.45
+}
+.brand{
+  margin:18px 0 14px;padding:25px 18px 22px;
+  background:linear-gradient(145deg,var(--card),var(--ac2));
+  border:1px solid var(--bd);border-radius:24px;
+  box-shadow:var(--shadow);backdrop-filter:none;-webkit-backdrop-filter:none
+}
+.brand svg{width:96px;height:104px;margin-bottom:12px;filter:drop-shadow(0 8px 12px rgba(8,48,30,.16))}
+.brand b{font-size:30px;font-weight:800;letter-spacing:-.045em}
+.brand span{max-width:300px;margin:6px auto 0;color:var(--mu);font-size:14px}
+.card,.k,.foot{
+  background:var(--card);border:1px solid var(--bd);
+  box-shadow:var(--shadow-soft);backdrop-filter:none;-webkit-backdrop-filter:none
+}
+.card{padding:17px;margin-bottom:14px;border-radius:18px}
+.card.sc{padding:16px 14px}
+.card#form{border-color:rgba(8,115,77,.24);box-shadow:var(--shadow)}
+.row{gap:10px;margin-bottom:10px}
+label{font-size:12px;font-weight:650;color:var(--mu);margin:0 0 6px}
+input,select,button{
+  min-height:46px;padding:11px 13px;
+  color:var(--tx);background:var(--fld);
+  border:1px solid var(--bd);border-radius:12px;
+  transition:border-color .16s ease,background-color .16s ease,box-shadow .16s ease,transform .12s ease
+}
+input,select{font-size:14px}
+input::placeholder{color:var(--mu);opacity:.72}
+input:focus,select:focus{
+  outline:none;border-color:var(--ac);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 16%,transparent)
+}
+input[type=range]{min-height:30px;padding:0}
+input[type=checkbox]{min-height:18px;accent-color:var(--ac)}
+button{font-size:13px;font-weight:650}
+button:hover:not(:disabled){border-color:color-mix(in srgb,var(--ac) 38%,var(--bd));background:var(--ac2)}
+button:active{transform:translateY(1px) scale(.99)}
+button.p{
+  min-height:48px;
+  color:var(--onac);
+  background:linear-gradient(135deg,#0a8054,#075b3c);
+  border:0;border-radius:13px;
+  box-shadow:0 5px 12px rgba(8,115,77,.19);
+  font-weight:750;letter-spacing:.005em
+}
+button.p:hover:not(:disabled){background:linear-gradient(135deg,#096f4b,#064c33);box-shadow:0 7px 16px rgba(8,115,77,.23)}
+button:disabled{cursor:wait}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.tabs{
+  gap:5px;padding:4px;margin:0 0 14px;
+  background:var(--card);border:1px solid var(--bd);
+  border-radius:14px;box-shadow:var(--shadow-soft)
+}
+.tabs button{
+  min-height:40px;padding:8px 12px;
+  border:0;border-radius:10px;background:transparent;
+  color:var(--mu);font-size:13px
+}
+.tabs button:hover:not(.on){background:var(--fld)}
+.tabs button.on{background:var(--ac);color:var(--onac);box-shadow:0 2px 6px rgba(8,115,77,.16)}
+.grid{gap:10px;margin:0 0 14px}
+.k{
+  min-height:102px;padding:15px 14px;border-radius:16px;
+  display:flex;flex-direction:column;justify-content:center
+}
+.k small{font-size:12px;font-weight:600;color:var(--mu);margin-bottom:5px}
+.k b{font-size:19px;line-height:1.2;letter-spacing:-.025em}
+.k span{font-size:11px;margin-top:5px;color:var(--mu)}
+.k.big{
+  min-height:104px;padding:16px 18px;
+  background:linear-gradient(120deg,#0b7950,#06472f);
+  border:1px solid rgba(243,189,72,.48);
+  box-shadow:0 8px 20px rgba(7,78,49,.16)
+}
+.k.big small{color:rgba(255,255,255,.78);font-weight:650}
+.k.big b{color:#ffd56f;font-size:27px}
+.k.big span{color:rgba(255,255,255,.75)}
+.sc{overflow-x:auto;overscroll-behavior-x:contain}
+table{font-size:12px}
+th,td{padding:10px 8px;border-bottom:1px solid var(--bd)}
+th{font-size:10px;font-weight:750;letter-spacing:.055em;text-transform:uppercase;color:var(--mu)}
+tbody tr:last-child td{border-bottom:0}
+.it{gap:12px;padding:12px 0;border-bottom:1px solid var(--bd)}
+.it>div:first-child{min-width:0}
+.it b{font-size:13px;line-height:1.45}
+.it small{font-size:12px;margin-top:3px;line-height:1.45}
+.x{min-height:36px;width:auto;padding:7px 10px;border-radius:10px;font-size:12px}
+.x:not(.n){background:transparent}
+.x.n{color:var(--ac)}
+.em{padding:18px 10px;color:var(--mu);font-size:13px}
+.sep{border-color:var(--bd);margin:18px 0}
+.hint{font-size:12px;line-height:1.55;color:var(--mu)}
+.foot{padding:12px 14px;border-radius:14px;color:var(--mu);font-size:12px;line-height:1.5}
+.cr{background:var(--ac2);border:1px solid color-mix(in srgb,var(--ac) 38%,var(--bd));border-radius:13px;padding:13px}
+.cr button{background:var(--card)}
+.wps{gap:12px}
+.wp{border-radius:16px;box-shadow:var(--shadow-soft);transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.wp:hover{transform:translateY(-2px)}
+.wp[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 35%,transparent)}
+#v1> .card:first-child,#v2> .card:first-child{
+  display:grid;grid-template-columns:minmax(48px,1fr) minmax(150px,220px);
+  align-items:center;gap:10px
+}
+#v1> .card:first-child label,#v2> .card:first-child label{margin:0}
+#v1> .card:first-child input,#v2> .card:first-child input{width:100%}
+#form .row{align-items:end}
+#add{width:100%;margin-top:2px}
+#login h2{margin-bottom:14px}
+#cfg>#c_back{margin-bottom:8px}
+@media(max-width:460px){
+  main{padding:15px 13px 32px}
+  .brand{margin-top:12px;padding:22px 15px 20px}
+  .card{padding:14px;border-radius:16px}
+  .k{min-height:94px;padding:12px}
+  .k b{font-size:17px}
+  .k.big b{font-size:25px}
+  .row{flex-wrap:wrap}
+  .row>div:only-child{flex-basis:100%}
+  #v1> .card:first-child,#v2> .card:first-child{grid-template-columns:1fr minmax(145px,1.2fr)}
+  th,td{padding:9px 7px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important}
+}
+html.lock-checking main{visibility:hidden}
+.app-lock{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:rgba(7,25,17,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.app-lock[hidden]{display:none!important}
+html.lock-checking .app-lock[hidden]{display:grid!important}
+.app-lock-card{width:min(100%,390px);padding:26px 22px 22px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:22px;box-shadow:0 24px 70px rgba(0,0,0,.3);text-align:center}
+.lock-mark{width:54px;height:54px;margin:0 auto 14px;display:grid;place-items:center;border-radius:17px;background:var(--ac2);color:var(--ac);font-size:24px}
+.app-lock-card h1{margin:0 0 7px}
+.app-lock-card p{margin:0 0 18px;color:var(--mu);font-size:13px}
+.app-lock-card input{text-align:center;letter-spacing:.3em;font-size:20px}
+.app-lock-card button{width:100%;margin-top:10px}
+.app-lock-card .lock-secondary{background:transparent;border:0;color:var(--mu);box-shadow:none}
+.security-choice{display:flex;align-items:center;gap:10px;margin:12px 0;padding:13px;border:1px solid var(--bd);border-radius:13px;background:var(--fld);color:var(--tx);font-size:13px}
+.security-choice input{width:18px;min-height:18px;flex:none;margin:0}
+#top_out{margin-left:auto;height:44px;padding:0 14px;border-radius:22px;font-size:13px;font-weight:700;white-space:nowrap;flex:none;background:var(--card);color:var(--tx);border:1px solid var(--bd)}
+#top_out[hidden]{display:none!important}
+#top_out+.gear{margin-left:0}
+#c_out{width:100%;margin:10px 0 4px}
 </style>
 </head>
 <body>
@@ -84,17 +322,77 @@ h2{font-size:15px;margin:0 0 8px}.em{color:var(--mu);text-align:center;padding:8
 <div class="top bare" id="top">
   <div class="logo" id="logo" hidden></div>
   <div class="tt" id="tt" hidden><h1 id="biz">Cabine</h1><div class="sub" id="co"></div></div>
+  <button id="top_out" title="Se déconnecter" aria-label="Se déconnecter" hidden>Déconnexion</button>
   <button class="gear" id="gear" title="Paramètres" aria-label="Paramètres">⚙️</button>
 </div>
 <div class="chip" id="st"></div>
 
 <div class="card" id="cfg" hidden>
-  <h2>Paramètres</h2>
+  <div class="row" style="align-items:center"><div style="flex:0 0 auto"><button id="c_back">← Retour</button></div><h2 style="margin:0;flex:1;text-align:right">Paramètres</h2></div>
+  <button id="c_out" hidden>Se déconnecter</button>
+  <div id="acct" hidden>
+    <h2>Mon compte</h2>
+    <div class="hint" id="ac_who" style="margin:0 0 8px"></div>
+    <div class="row"><div><label>Mot de passe actuel</label><input id="pw_old" type="password" autocomplete="current-password"></div></div>
+    <div class="row"><div><label>Nouveau mot de passe</label><input id="pw_new" type="password" autocomplete="new-password"></div><div><label>Confirmer</label><input id="pw_new2" type="password" autocomplete="new-password"></div></div>
+    <button class="p" id="pw_go">Changer le mot de passe</button><div class="hint" id="pw_msg"></div>
+    <div id="owner_email_change" hidden>
+      <div class="sep"></div>
+      <h2>Modifier mon adresse e-mail</h2>
+      <div class="row"><div><label for="email_new">Nouvelle adresse e-mail</label><input id="email_new" type="email" autocomplete="email" inputmode="email"></div></div>
+      <div class="row"><div><label for="email_password">Mot de passe actuel</label><input id="email_password" type="password" autocomplete="current-password"></div></div>
+      <button class="p" id="email_go">Demander le changement d’e-mail</button>
+      <div class="hint" id="email_msg" role="status" aria-live="polite"></div>
+    </div>
+    <div class="sep"></div>
+  </div>
+  <section id="security_settings" hidden>
+    <h2>Verrouillage de l’application</h2>
+    <div class="hint" id="sec_status">Le verrouillage est enregistré sur ce téléphone.</div>
+    <div id="sec_not_native" class="hint" hidden>Le code PIN et l’empreinte digitale sont disponibles dans l’application Android.</div>
+    <div id="sec_setup" hidden>
+      <div class="row"><div><label for="sec_new">Créer un code PIN à 6 chiffres</label><input id="sec_new" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6" pattern="[0-9]{6}" placeholder="••••••"></div></div>
+      <div class="row"><div><label for="sec_confirm">Confirmer le code PIN</label><input id="sec_confirm" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6" pattern="[0-9]{6}" placeholder="••••••"></div></div>
+      <button class="p" id="sec_enable">Activer le verrouillage</button>
+    </div>
+    <div id="sec_manage" hidden>
+      <div class="row"><div><label for="sec_current">Code PIN actuel</label><input id="sec_current" type="password" inputmode="numeric" autocomplete="current-password" maxlength="6" placeholder="••••••"></div></div>
+      <div class="row"><div><label for="sec_change_new">Nouveau code PIN</label><input id="sec_change_new" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6" placeholder="6 chiffres"></div><div><label for="sec_change_confirm">Confirmer</label><input id="sec_change_confirm" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6" placeholder="6 chiffres"></div></div>
+      <button class="p" id="sec_change">Changer le code PIN</button>
+      <label class="security-choice"><input type="checkbox" id="sec_bio"><span>Déverrouiller avec l’empreinte ou la biométrie du téléphone</span></label>
+      <div class="hint" id="sec_bio_hint"></div>
+      <button id="sec_disable">Désactiver le verrouillage</button>
+    </div>
+    <div class="hint" id="sec_msg" role="status" aria-live="polite"></div>
+    <div class="sep"></div>
+  </section>
   <div id="own">
+    <h2>Réglages de la cabine</h2>
     <div class="row"><div><label>Numéro MTN</label><input id="c_mtn" type="tel" inputmode="tel"></div><div><label>Numéro Moov</label><input id="c_moov" type="tel" inputmode="tel"></div></div>
     <div class="row"><div><label>Numéro Celtis</label><input id="c_cel" type="tel" inputmode="tel"></div></div>
     <div class="row"><div><label>Dépôt : F pour 1000 F</label><input id="c_qd" type="number" step="0.01" min="0" placeholder="3"></div><div><label>Retrait : % des frais</label><input id="c_qr" type="number" step="0.01" min="0" placeholder="47"></div><div><label>Crédit/forfait : F pour 100 F</label><input id="c_qc" type="number" step="0.01" min="0" placeholder="4"></div></div>
     <button class="p" id="c_save">Enregistrer les paramètres</button>
+    <div class="sep"></div>
+  </div>
+  <div id="empc" hidden>
+  <h2>Créer un compte employé</h2>
+  <div class="row"><div><label>Prénom</label><input id="e_pn" autocomplete="off"></div><div><label>Nom</label><input id="e_nm" autocomplete="off"></div></div>
+  <div class="row"><div><label>E-mail (vide = généré)</label><input id="e_em" type="email" placeholder="généré automatiquement"></div></div>
+  <div class="row"><div><label>Mot de passe</label><input id="e_pw" type="text" autocomplete="off"></div><div style="flex:0 0 auto;align-self:flex-end"><button id="e_gen">Générer</button></div></div>
+  <button class="p" id="e_go">Créer un compte employé</button>
+  <div id="e_msg"></div>
+  <h2 style="margin-top:14px">Mes employés</h2>
+  <div id="emps"></div>
+</div>
+  <div class="sep"></div>
+  <div id="bkp" hidden>
+    <h2>Sauvegarde et données</h2>
+    <label style="display:flex;gap:10px;align-items:center;color:var(--tx);font-size:14px"><input type="checkbox" id="bk_on" style="width:auto"><span>Sauvegarde automatique chaque soir à 23h59 (heure du Bénin)</span></label>
+    <div class="hint" id="bk_last"></div>
+    <div class="row" style="margin-top:10px"><button id="bk_exp">Exporter en Excel</button><button id="bk_imp">Importer un fichier Excel</button></div>
+    <input type="file" id="bk_file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+    <div class="hint" id="bk_msg"></div>
+    <div class="hint">Les fichiers sont enregistrés dans le dossier Documents/CabineMomo du téléphone. La sauvegarde du soir se fait si l’application est ouverte à 23h59, sinon au prochain démarrage.</div>
     <div class="sep"></div>
   </div>
   <h2>Fond d’écran</h2>
@@ -106,7 +404,6 @@ h2{font-size:15px;margin:0 0 8px}.em{color:var(--mu);text-align:center;padding:8
   <div class="sep"></div>
   <h2>Apparence</h2>
   <select id="th" aria-label="Apparence"><option value="auto">Automatique (comme le téléphone)</option><option value="light">Clair</option><option value="dark">Sombre</option></select>
-  <button id="c_out" style="margin-top:14px" hidden>Se déconnecter</button>
 </div>
 
 <div class="brand" id="brand" hidden>
@@ -130,6 +427,7 @@ h2{font-size:15px;margin:0 0 8px}.em{color:var(--mu);text-align:center;padding:8
     <div class="row"><div><label>Mot de passe</label><input id="a_pw" type="text" autocomplete="off"></div><div style="flex:0 0 auto;align-self:flex-end"><button id="a_gen">Générer</button></div></div>
     <button class="p" id="a_go">Créer le compte propriétaire</button>
     <div id="a_msg"></div>
+    <div class="hint" id="admin_push_status" role="status" aria-live="polite">Les notifications de sécurité seront activées sur cet appareil après autorisation.</div>
   </div>
   <div class="card"><h2>Comptes propriétaires</h2><div id="owners"></div></div>
   <button id="a_out">Se déconnecter</button>
@@ -142,17 +440,6 @@ h2{font-size:15px;margin:0 0 8px}.em{color:var(--mu);text-align:center;padding:8
 </div>
 
 <div id="shop" hidden>
-<div class="card" id="empc" hidden>
-  <h2>Créer un compte employé</h2>
-  <div class="row"><div><label>Prénom</label><input id="e_pn" autocomplete="off"></div><div><label>Nom</label><input id="e_nm" autocomplete="off"></div></div>
-  <div class="row"><div><label>E-mail (vide = généré)</label><input id="e_em" type="email" placeholder="généré automatiquement"></div></div>
-  <div class="row"><div><label>Mot de passe</label><input id="e_pw" type="text" autocomplete="off"></div><div style="flex:0 0 auto;align-self:flex-end"><button id="e_gen">Générer</button></div></div>
-  <button class="p" id="e_go">Créer un compte employé</button>
-  <div id="e_msg"></div>
-  <h2 style="margin-top:14px">Mes employés</h2>
-  <div id="emps"></div>
-</div>
-
 <div class="card" id="form" hidden>
   <div class="row">
     <div><label>SIM</label><select id="sim"><option>MTN</option><option>Moov</option><option>Celtis</option></select></div>
@@ -172,20 +459,32 @@ h2{font-size:15px;margin:0 0 8px}.em{color:var(--mu);text-align:center;padding:8
 </div>
 </div>
 </main>
+<div id="app-lock" class="app-lock" role="dialog" aria-modal="true" aria-labelledby="lock-title" hidden>
+  <div class="app-lock-card">
+    <div class="lock-mark" aria-hidden="true">🔒</div>
+    <h1 id="lock-title">Cabine Momo</h1>
+    <p id="lock-desc">Entrez votre code PIN pour continuer.</p>
+    <input id="lock-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="6" aria-label="Code PIN à 6 chiffres" placeholder="••••••">
+    <button class="p" id="lock-go">Déverrouiller</button>
+    <button id="lock-bio" hidden>Utiliser l’empreinte digitale</button>
+    <button class="lock-secondary" id="lock-logout">Code oublié ? Se déconnecter</button>
+    <div class="hint" id="lock-msg" role="status" aria-live="polite"></div>
+  </div>
+</div>
 <script>
 var NAME="Cabine",DOM="cabine.app",KEY="cabine_momo_v1",E=[];
 try{E=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){E=[]}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(E))}catch(e){}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(E))}catch(e){}try{snapPush()}catch(e){}}
 function save(){persist();setTimeout(sync,0)}
 function td(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 var day=td(),mon=td().slice(0,7),$=function(i){return document.getElementById(i)};
 var SIMS=["MTN","Moov","Celtis"],TN={dep:"Dépôt",ret:"Retrait",cred:"Achat de crédit",fnet:"Achat de forfait internet",fapp:"Achat de forfait appel",forf:"Achat de forfait internet"};
 var CK="cabine_momo_cfg",C={};
 try{C=JSON.parse(localStorage.getItem(CK)||"{}")}catch(e){C={}}
-var SU="https://ujuiblvtiaknnwjrugki.supabase.co",SK="sb_publishable_ZzBma-mTfltcaHtqQutKyw_s49OB69V",SS="cabine_momo_sess",DK="cabine_momo_del",LK="cabine_momo_last",S=null,DEL=[],busy=false,pd=true,lastRole="?",syncErr=false;
+var SU="https://ujuiblvtiaknnwjrugki.supabase.co",SK="sb_publishable_ZzBma-mTfltcaHtqQutKyw_s49OB69V",SS="cabine_momo_sess",DK="cabine_momo_del",LK="cabine_momo_last",S=null,DEL=[],busy=false,pd=true,lastRole="?",syncErr=false,syncMsg="";
 try{S=JSON.parse(localStorage.getItem(SS)||"null")}catch(e){S=null}
 try{DEL=JSON.parse(localStorage.getItem(DK)||"[]")}catch(e){DEL=[]}
-function jwtp(t){try{return JSON.parse(atob(String(t).split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))}catch(e){return{}}}
+function jwtp(t){try{return JSON.parse(new TextDecoder("utf-8").decode(Uint8Array.from(atob(String(t).split(".")[1].replace(/-/g,"+").replace(/_/g,"/")),function(c){return c.charCodeAt(0)})))}catch(e){return{}}}
 function fromTok(t,old){var p=jwtp(t),m=p.app_metadata||{};
 return{e:String(p.email||(old&&old.e)||"").toLowerCase(),u:p.sub||"",role:m.role||"",pn:m.prenom||"",nm:m.nom||"",co:m.role==="owner"?(m.name||""):(m.company||"")}}
 if(S){var o0=fromTok(S.a,S);for(var k0 in o0)S[k0]=o0[k0]}
@@ -260,18 +559,31 @@ if(id&&confirm("Supprimer cette opération ?")){var d=E.filter(function(e){retur
 function tab(n){$("v1").hidden=n!==1;$("v2").hidden=n!==2;$("t1").className=n===1?"on":"";$("t2").className=n===2?"on":""}
 $("t1").onclick=function(){tab(1)};$("t2").onclick=function(){tab(2)};
 function cfgShow(){$("c_mtn").value=C.MTN||"";$("c_moov").value=C.Moov||"";$("c_cel").value=C.Celtis||"";$("c_qd").value=C.q_dep||"";$("c_qr").value=C.q_ret||"";$("c_qc").value=C.q_cred||""}
-$("gear").onclick=function(){$("cfg").hidden=!$("cfg").hidden};
+
 $("c_save").onclick=function(){C={t:1,MTN:$("c_mtn").value.trim(),Moov:$("c_moov").value.trim(),Celtis:$("c_cel").value.trim(),q_dep:nn($("c_qd").value),q_ret:nn($("c_qr").value),q_cred:nn($("c_qc").value)};
-try{localStorage.setItem(CK,JSON.stringify(C))}catch(e){}cfgShow();$("cfg").hidden=true;pd=true;render();sync()};
-function logout(){if(E.some(function(x){return !x.synced})&&!confirm("Des opérations ne sont pas encore envoyées. Se déconnecter quand même ?"))return;
-setS(null);$("cfg").hidden=true;uiSync();render()}
-$("c_out").onclick=logout;$("a_out").onclick=logout;$("b_out").onclick=logout;
+try{localStorage.setItem(CK,JSON.stringify(C))}catch(e){}cfgShow();inCfg=false;uiSync();pd=true;render();sync()};
+async function logout(){if(E.some(function(x){return !x.synced})&&!confirm("Des opérations ne sont pas encore envoyées. Se déconnecter quand même ?"))return;
+if(isAdmin()&&pushToken){try{await adminPushApi("unregister",{token:pushToken})}catch(e){}}
+if(isAdmin()&&PUSH){try{await PUSH.unregister()}catch(e){}}
+pushToken="";setS(null);inCfg=false;uiSync();render()}
+$("c_out").onclick=logout;$("top_out").onclick=logout;$("a_out").onclick=logout;$("b_out").onclick=logout;
 function persistDel(){try{localStorage.setItem(DK,JSON.stringify(DEL))}catch(e){}}
 function setS(j){
 if(!(j&&j.access_token)){S=null}
 else{S=fromTok(j.access_token,S||{e:j.user&&j.user.email});S.a=j.access_token;S.r=j.refresh_token;S.x=Math.floor(Date.now()/1000)+(j.expires_in||3600)}
 try{if(S)localStorage.setItem(SS,JSON.stringify(S));else localStorage.removeItem(SS)}catch(e2){}}
 function auth(g,b){return fetch(SU+"/auth/v1/token?grant_type="+g,{method:"POST",headers:{apikey:SK,"Content-Type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json()})}
+/* ---- Mot de passe personnel (alias) : le mot de passe Supabase ne change jamais ---- */
+var AK="cabine_momo_alias";
+function b64(u){var t="";for(var i=0;i<u.length;i++)t+=String.fromCharCode(u[i]);return btoa(t)}
+function unb64(t){var b=atob(t),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+function aGet(){try{return JSON.parse(localStorage.getItem(AK)||"{}")||{}}catch(e){return{}}}
+function aSet(m){try{localStorage.setItem(AK,JSON.stringify(m))}catch(e){}}
+function aId(em){return String(em||"").trim().toLowerCase()}
+async function aKey(pw,salt){var km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:100000,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function aSave(em,alias,real){var m=aGet(),k=aId(em);if(alias===real){delete m[k]}else{var salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),key=await aKey(alias,salt),ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(real));m[k]={s:b64(salt),i:b64(iv),d:b64(new Uint8Array(ct))}}aSet(m)}
+async function aReal(em,typed){var e=aGet()[aId(em)];if(!e||!window.crypto||!crypto.subtle)return null;try{var key=await aKey(typed,unb64(e.s)),pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(e.i)},key,unb64(e.d));return new TextDecoder().decode(pt)}catch(x){return null}}
+async function authPw(em,typed){if(aGet()[aId(em)]){var real=await aReal(em,typed);if(real===null)return{error_code:"invalid_credentials"};var j=await auth("password",{email:em,password:real});if(j.access_token)return j;var m=aGet();delete m[aId(em)];aSet(m);return auth("password",{email:em,password:typed})}return auth("password",{email:em,password:typed})}
 async function token(){if(!S)return null;if(S.x-60>Date.now()/1000)return S.a;
 try{var j=await auth("refresh_token",{refresh_token:S.r});if(j.access_token){setS(j);return S.a}if(j.error_code||j.error){setS(null);uiSync()}}catch(e){}return null}
 async function api(path,opt){var t=await token();if(!t)throw new Error("auth");opt=opt||{};opt.headers=Object.assign({apikey:SK,Authorization:"Bearer "+t,"Content-Type":"application/json"},opt.headers||{});return fetch(SU+"/rest/v1/"+path,opt)}
@@ -284,7 +596,7 @@ var j={};try{j=await r.json()}catch(e){j={}}
 if(!r.ok&&!j.error)j.error=r.status===401?"Session expirée : reconnectez-vous.":r.status===404?NOFN:(j.message||j.msg||"Erreur "+r.status);
 return j}finally{clearTimeout(tm)}}
 function applyRole(){var r=S?S.role:"",role=!S?"":r==="admin"?"a":r==="owner"?"o":r==="employee"?"e":"x",shop=role==="o"||role==="e",co=coName();
-$("login").hidden=!!S;$("brand").hidden=!!S;$("app").hidden=!S;$("tt").hidden=!S;$("top").className=S?"top":"top bare";$("c_out").hidden=!S;
+$("login").hidden=!!S||inCfg;$("brand").hidden=!!S||inCfg;$("app").hidden=!S||inCfg;$("cfg").hidden=!inCfg;$("acct").hidden=!S;$("bkp").hidden=role!=="o";$("tt").hidden=!S;$("top").className=S?"top":"top bare";$("c_out").hidden=!S;$("top_out").hidden=!S;
 $("admin").hidden=role!=="a";$("bad").hidden=role!=="x";$("shop").hidden=!shop;
 $("own").hidden=role!=="o";$("empc").hidden=role!=="o";$("form").hidden=role!=="e";
 $("logo").hidden=!shop;$("logo").textContent=ini(co);
@@ -293,11 +605,12 @@ $("co").textContent=role==="e"?co:"";
 if(role!==lastRole){lastRole=role;
 if(role==="e"){$("type").innerHTML=["ret","dep","fnet","fapp","cred"].map(function(t){return '<option value="'+t+'">'+TN[t]+'</option>'}).join("");tchg()}
 if(role==="o"){$("e_pw").value=gen();empList()}
-if(role==="a"){$("a_pw").value=gen();aList()}}}
-function uiSync(){applyRole();var n=E.filter(function(e){return !e.synced}).length,lb=isAdmin()?"Administrateur":isOwner()?"Propriétaire":isEmp()?"Employé":"";
-$("st").textContent=!S?"🔒 Connectez-vous pour utiliser l’application":"👤 "+(S.e||"")+(lb?" · "+lb:"")+(isAdmin()||!lb?"":" · "+(busy?"🔄 Synchronisation…":!navigator.onLine?"📴 Hors ligne"+(n?" · "+n+" en attente":""):n?(syncErr?"⚠️ ":"⏳ ")+n+" en attente d’envoi":syncErr?"⚠️ Synchronisation impossible":"✅ Synchronisé"))}
+if(role==="a"){$("a_pw").value=gen();aList();registerAdminPush()}}}
+function uiSync(){applyRole();try{snapPush()}catch(e){}var n=E.filter(function(e){return !e.synced}).length,lb=isAdmin()?"Administrateur":isOwner()?"Propriétaire":isEmp()?"Employé":"";
+$("st").textContent=!S?"🔒 Connectez-vous pour utiliser l’application":"👤 "+(S.e||"")+(lb?" · "+lb:"")+(isAdmin()||!lb?"":" · "+(busy?"🔄 Synchronisation…":!navigator.onLine?"📴 Hors ligne"+(n?" · "+n+" en attente":""):n?(syncErr?"⚠️ ":"⏳ ")+n+" en attente d’envoi"+(syncErr&&syncMsg?" · "+syncMsg+" — touchez pour réessayer":""):syncErr?"⚠️ Synchronisation impossible"+(syncMsg?" · "+syncMsg:""):"✅ Synchronisé"))}
 async function pullC(){var pr=await api("reglages?select=data"),pj=await pr.json();
 if(Array.isArray(pj)&&pj[0]&&pj[0].data&&pj[0].data.t){C=pj[0].data;try{localStorage.setItem(CK,JSON.stringify(C))}catch(e){}cfgShow();render()}}
+async function why(r){var t="";try{t=(await r.text()).slice(0,150)}catch(e){}return "HTTP "+r.status+(t?" : "+t:"")}
 async function sync(){
 if(busy||!S||!navigator.onLine||!(isOwner()||isEmp())){uiSync();return}
 busy=true;uiSync();
@@ -306,7 +619,7 @@ for(var i=0;i<DEL.length;i++){var r0=await api("operations?id=eq."+encodeURIComp
 persistDel();
 for(var j=0;j<E.length;j++){var e=E[j];if(e.synced)continue;
 var r=await api("operations",{method:"POST",headers:{Prefer:"resolution=ignore-duplicates,return=minimal"},body:JSON.stringify({id:e.id,date:e.date,at:e.at||null,sim:e.sim,type:e.type,amount:e.amount,profit:e.profit,frais:e.frais||0,source:e.source||"manuel",by_name:e.bn||null})});
-if(r.ok||r.status===409)e.synced=true;else throw 0}
+if(r.ok||r.status===409)e.synced=true;else{syncMsg="Envoi refusé ("+await why(r)+")";throw 0}}
 persist();
 if(isOwner()){if(!C.t){await pullC()}
 else if(pd){var rp=await api("reglages",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({owner_id:S.u,data:C})});if(rp.ok)pd=false}}
@@ -315,11 +628,11 @@ var g=await api("operations?select=*&order=date.desc&limit=1000");var rows=await
 if(Array.isArray(rows)){var ids={},add=0;E.forEach(function(x){ids[x.id]=1});
 rows.forEach(function(x){if(!ids[x.id]&&DEL.indexOf(x.id)<0){add++;E.push({id:x.id,date:x.date,at:x.at||"",sim:x.sim,type:x.type,amount:Number(x.amount),profit:Number(x.profit),frais:Number(x.frais)||0,source:x.source,by:x.by_email||"",bn:x.by_name||"",synced:true})}});
 if(rows.length<1000){var sid={},n0=E.length;rows.forEach(function(x){sid[x.id]=1});E=E.filter(function(x){return !x.synced||sid[x.id]});if(E.length!==n0)add++}
-if(add)persist();syncErr=false}else syncErr=true
-}catch(err){syncErr=true}
+if(add)persist();syncErr=false;syncMsg=""}else{syncErr=true;syncMsg="Lecture refusée ("+JSON.stringify(rows).slice(0,150)+")"}
+}catch(err){syncErr=true;if(err!==0)syncMsg="Erreur ("+(err&&err.message||err)+")"}
 busy=false;uiSync();render()}
 var logging=false;$("l_go").onclick=async function(){if(logging)return;logging=true;$("l_go").disabled=true;$("l_msg").textContent="Connexion…";
-try{var j=await auth("password",{email:$("l_em").value.trim(),password:$("l_pw").value});
+try{var j=await authPw($("l_em").value.trim(),$("l_pw").value);
 if(j.access_token){var em=String((j.user&&j.user.email)||$("l_em").value.trim()).toLowerCase(),last="";
 try{last=localStorage.getItem(LK)||""}catch(e){}
 if(last&&last!==em){if(E.some(function(x){return !x.synced})&&!confirm("Des opérations de "+last+" ne sont pas encore envoyées et seront perdues. Continuer ?")){$("l_msg").textContent="Connexion annulée.";return}
@@ -379,6 +692,165 @@ else if(ac==="del"&&confirm("Retirer ce propriétaire et tous ses employés ? Il
 try{var rk=await fn({action:"remove_owner",id:id});if(rk.error)alert(rk.error)}catch(e){alert(nof(e))}aList()}};
 
 function nn(v){var x=parseFloat(v);return(isNaN(x)||x<0)?"":String(v).trim()}
+/* ---- Enregistrement des appareils administrateur pour le push FCM ---- */
+var PUSH=capP("PushNotifications"),pushListenersReady=false,pushToken="";
+function pushStatus(t){var el=$("admin_push_status");if(el)el.textContent=t||""}
+async function adminPushApi(action,data){
+  var t=await token();if(!t)throw new Error("Session expirée.");
+  var ac=new AbortController(),tm=setTimeout(function(){ac.abort()},15000),r,j={};
+  try{
+    r=await fetch(SU+"/functions/v1/admin-push",{method:"POST",signal:ac.signal,
+      headers:{apikey:SK,Authorization:"Bearer "+t,"Content-Type":"application/json"},
+      body:JSON.stringify(Object.assign({action:action},data||{}))});
+    try{j=await r.json()}catch(e){}
+    if(!r.ok)throw new Error(j.error||"Enregistrement push refusé.");
+    return j;
+  }finally{clearTimeout(tm)}
+}
+async function registerAdminPush(){
+  if(!isAdmin())return;
+  PUSH=capP("PushNotifications");
+  if(!PUSH){pushStatus("Les notifications push ne sont pas disponibles dans cette version de l’application.");return}
+  try{
+    if(!pushListenersReady){
+      await PUSH.addListener("registration",async function(t){
+        if(!isAdmin()||!t||!t.value)return;
+        pushToken=t.value;
+        try{await adminPushApi("register",{token:pushToken});pushStatus("✅ Notifications de sécurité activées sur cet appareil.")}
+        catch(e){pushStatus("Token reçu, mais appareil non enregistré. Vérifiez la configuration Supabase.")}
+      });
+      await PUSH.addListener("registrationError",function(){pushStatus("Inscription push impossible. Vérifiez la configuration Firebase de l’APK.")});
+      await PUSH.addListener("pushNotificationReceived",function(n){
+        if(isAdmin())pushStatus((n&&n.title?n.title+" — ":"")+(n&&n.body?n.body:"Nouvelle alerte de sécurité."));
+      });
+      await PUSH.addListener("pushNotificationActionPerformed",function(){if(isAdmin())pushStatus("Alerte de sécurité reçue.")});
+      pushListenersReady=true;
+    }
+    var p=await PUSH.checkPermissions();
+    if(p.receive!=="granted")p=await PUSH.requestPermissions();
+    if(p.receive!=="granted"){pushStatus("Autorisez les notifications dans les réglages Android pour recevoir les alertes.");return}
+    pushStatus("Activation des notifications sur cet appareil…");
+    await PUSH.register();
+  }catch(e){pushStatus("Activation impossible. Vérifiez Firebase et la connexion réseau.")}
+}
+/* ---- Verrouillage Android : PIN local et biométrie du téléphone ---- */
+var SEC=capP("CabineSecurity"),secState={pinSet:false,biometricAvailable:false,biometricEnabled:false},secLocked=false,secBioBusy=false,secBgTimer=0,SEC_LOCK_MS=30000;
+function secText(t){$("sec_msg").textContent=t||""}
+function secRender(){
+  $("security_settings").hidden=!S;
+  if(!S)return;
+  $("sec_not_native").hidden=!!SEC;
+  $("sec_setup").hidden=!SEC||secState.pinSet;
+  $("sec_manage").hidden=!SEC||!secState.pinSet;
+  $("sec_status").textContent=SEC?(secState.pinSet?"Verrouillage activé. L’application se verrouille au démarrage et après 30 secondes en arrière-plan.":"Choisissez un code PIN pour protéger l’accès à cette application sur ce téléphone."):"";
+  $("sec_bio").checked=!!secState.biometricEnabled;
+  $("sec_bio").disabled=!SEC||!secState.biometricAvailable;
+  $("sec_bio_hint").textContent=secState.biometricAvailable?"Le code PIN reste disponible comme solution de secours.":"Aucune empreinte ou biométrie forte n’est configurée sur cet appareil.";
+}
+function secShowLock(autoBio){
+  if(!secState.pinSet)return;
+  secLocked=true;document.documentElement.classList.add("lock-checking");
+  $("app-lock").hidden=false;$("lock-pin").value="";$("lock-msg").textContent="";
+  $("lock-bio").hidden=!(secState.biometricAvailable&&secState.biometricEnabled);
+  if(autoBio&&secState.biometricAvailable&&secState.biometricEnabled)setTimeout(secBiometric,250);
+}
+function secUnlock(){
+  secLocked=false;$("app-lock").hidden=true;document.documentElement.classList.remove("lock-checking");
+  $("lock-pin").value="";$("lock-msg").textContent="";
+}
+async function secInit(){
+  SEC=capP("CabineSecurity");
+  if(!SEC){document.documentElement.classList.remove("lock-checking");secRender();return}
+  try{
+    secState=await SEC.getState();
+    if(secState.pinSet){try{localStorage.setItem("cabine_momo_pin_lock","1")}catch(e){}secShowLock(true)}
+    else{try{localStorage.removeItem("cabine_momo_pin_lock")}catch(e){}document.documentElement.classList.remove("lock-checking")}
+    secRender();
+  }catch(e){
+    if(localStorage.getItem("cabine_momo_pin_lock")==="1"){secState.pinSet=true;secShowLock(false);$("lock-msg").textContent="Vérification impossible. Fermez et rouvrez l’application."}
+    else document.documentElement.classList.remove("lock-checking");
+    secRender();
+  }
+}
+function secPinValid(v){return /^[0-9]{6}$/.test(String(v||""))}
+function secNativeError(e){return(e&&e.message)||"Action de sécurité impossible. Réessayez."}
+function secPinFailure(r,msg){secText(r&&r.retryAfterMs>0?"Trop d’essais. Réessayez dans "+Math.ceil(r.retryAfterMs/1000)+" secondes.":msg)}
+$("sec_enable").onclick=async function(){
+  var p=$("sec_new").value,p2=$("sec_confirm").value;
+  if(!secPinValid(p)){secText("Le code PIN doit contenir exactement 6 chiffres.");return}
+  if(p!==p2){secText("Les deux codes PIN ne sont pas identiques.");return}
+  this.disabled=true;secText("Activation du verrouillage…");
+  try{var r=await SEC.setPin({pin:p});if(!r||!r.ok){secText("Impossible d’enregistrer le code PIN.");return}
+    secState=await SEC.getState();try{localStorage.setItem("cabine_momo_pin_lock","1")}catch(e){}
+    $("sec_new").value="";$("sec_confirm").value="";secRender();secText("✅ Verrouillage activé sur ce téléphone.");
+  }catch(e){secText(secNativeError(e))}
+  finally{this.disabled=false}
+};
+$("sec_change").onclick=async function(){
+  var old=$("sec_current").value,p=$("sec_change_new").value,p2=$("sec_change_confirm").value;
+  if(!secPinValid(old)){secText("Entrez votre code PIN actuel à 6 chiffres.");return}
+  if(!secPinValid(p)){secText("Le nouveau code PIN doit contenir 6 chiffres.");return}
+  if(p!==p2){secText("Les deux nouveaux codes PIN ne sont pas identiques.");return}
+  this.disabled=true;secText("Modification du code PIN…");
+  try{var r=await SEC.setPin({pin:p,oldPin:old});if(!r||!r.ok){secPinFailure(r,"Code PIN actuel incorrect.");return}
+    $("sec_current").value="";$("sec_change_new").value="";$("sec_change_confirm").value="";
+    secText("✅ Code PIN modifié.");
+  }catch(e){secText(secNativeError(e))}
+  finally{this.disabled=false}
+};
+$("sec_bio").onchange=async function(){
+  var enabled=this.checked;this.disabled=true;
+  try{var r=await SEC.setBiometricEnabled({enabled:enabled});if(!r||!r.ok){this.checked=!enabled;secText("Biométrie indisponible. Le code PIN reste actif.");return}
+    secState=await SEC.getState();secRender();secText(enabled?"✅ Déverrouillage biométrique activé.":"Déverrouillage biométrique désactivé.");
+  }catch(e){this.checked=!enabled;secText(secNativeError(e))}
+  finally{this.disabled=!secState.biometricAvailable}
+};
+$("sec_disable").onclick=async function(){
+  var p=$("sec_current").value;
+  if(!secPinValid(p)){secText("Entrez votre code PIN actuel pour désactiver le verrouillage.");return}
+  if(!confirm("Désactiver le verrouillage PIN et biométrique sur ce téléphone ?"))return;
+  this.disabled=true;
+  try{var r=await SEC.disablePin({pin:p});if(!r||!r.ok){secPinFailure(r,"Code PIN actuel incorrect.");return}
+    secState=await SEC.getState();try{localStorage.removeItem("cabine_momo_pin_lock")}catch(e){}
+    $("sec_current").value="";secRender();secText("Verrouillage désactivé.");
+  }catch(e){secText(secNativeError(e))}
+  finally{this.disabled=false}
+};
+async function secBiometric(){
+  if(secBioBusy||!SEC||!secState.biometricEnabled)return;
+  secBioBusy=true;$("lock-msg").textContent="Vérification biométrique…";
+  try{var r=await SEC.authenticateBiometric();if(r&&r.ok)secUnlock();else $("lock-msg").textContent="Empreinte non reconnue. Utilisez le code PIN."}
+  catch(e){$("lock-msg").textContent="Utilisez le code PIN pour déverrouiller."}
+  finally{secBioBusy=false}
+}
+$("lock-go").onclick=async function(){
+  var p=$("lock-pin").value;
+  if(!secPinValid(p)){$("lock-msg").textContent="Entrez les 6 chiffres du code PIN.";return}
+  this.disabled=true;$("lock-msg").textContent="Vérification…";
+  try{var r=await SEC.verifyPin({pin:p});if(r&&r.ok)secUnlock();else if(r&&r.retryAfterMs>0)$("lock-msg").textContent="Trop d’essais. Réessayez dans "+Math.ceil(r.retryAfterMs/1000)+" secondes.";
+    else{$("lock-pin").value="";$("lock-msg").textContent="Code PIN incorrect."}}
+  catch(e){$("lock-msg").textContent=secNativeError(e)}
+  finally{this.disabled=false}
+};
+$("lock-pin").onkeydown=function(ev){if(ev.key==="Enter")$("lock-go").click()};
+$("lock-bio").onclick=secBiometric;
+$("lock-logout").onclick=async function(){
+  if(!confirm("Réinitialiser le code PIN de ce téléphone et se déconnecter ? Les opérations non synchronisées resteront enregistrées sur le téléphone."))return;
+  this.disabled=true;
+  try{
+    await SEC.clearPin({force:true});
+    try{localStorage.removeItem("cabine_momo_pin_lock")}catch(e){}
+    setS(null);lastRole="?";inCfg=false;secState={pinSet:false,biometricAvailable:false,biometricEnabled:false};
+    secUnlock();uiSync();render();
+  }catch(e){$("lock-msg").textContent=secNativeError(e)}
+  finally{this.disabled=false}
+};
+document.addEventListener("visibilitychange",function(){
+  if(!secState.pinSet)return;
+  if(document.hidden){clearTimeout(secBgTimer);secBgTimer=setTimeout(function(){if(document.hidden)secShowLock(false)},SEC_LOCK_MS)}
+  else{clearTimeout(secBgTimer);if(secLocked){secShowLock(false);if(secState.biometricEnabled)setTimeout(secBiometric,180)}}
+});
+window.addEventListener("pageshow",function(){if(secLocked)secShowLock(false)});
 /* ---- Fond d’écran (propre à chaque téléphone, pour tous les types de compte) ---- */
 var WK="cabine_momo_wp",WI="cabine_momo_wpimg",TK="cabine_momo_theme";
 var WPS=[["emeraude","Émeraude"],["aurore","Aurore"],["couchant","Couchant"],["ocean","Océan"],["nuit","Nuit"],["sable","Sable"],["rose","Rose"],["graphite","Graphite"]];
@@ -417,8 +889,220 @@ $("wp_dim").oninput=function(){WP.dim=Number(this.value)||0;wpSave();wpApply()};
 function thApply(v){var r=document.documentElement;if(v==="light"||v==="dark")r.setAttribute("data-theme",v);else r.removeAttribute("data-theme")}
 function thInit(){var v="auto";try{v=localStorage.getItem(TK)||"auto"}catch(e){}$("th").value=v;thApply(v)}
 $("th").onchange=function(){try{localStorage.setItem(TK,this.value)}catch(e){}thApply(this.value)};
+$("st").onclick=function(){sync()};
 window.addEventListener("online",sync);window.addEventListener("offline",uiSync);setInterval(sync,60000);
-wpInit();thInit();cfgShow();uiSync();sync();render();
+/* ---- Paramètres : page à part ---- */
+var inCfg=false;
+function openCfg(on){inCfg=!!on;
+if(inCfg){cfgShow();bkShow();secRender();$("owner_email_change").hidden=!isOwner();$("email_password").value="";$("email_msg").textContent="";["pw_old","pw_new","pw_new2"].forEach(function(i){$(i).value=""});$("pw_msg").textContent="";$("bk_msg").textContent="";
+var lb=isAdmin()?"Administrateur":isOwner()?"Propriétaire":isEmp()?"Employé":"";$("ac_who").textContent=S?(S.e||"")+(lb?" · "+lb:""):""}
+uiSync();window.scrollTo(0,0)}
+$("gear").onclick=function(){openCfg(!inCfg)};
+$("c_back").onclick=function(){openCfg(false)};
+/* ---- Changer son mot de passe (propriétaire, employé, administrateur) ---- */
+function pwErr(m){var x=String(m||"").toLowerCase();
+if(x.indexOf("different")>-1||x.indexOf("same")>-1)return"Le nouveau mot de passe doit être différent de l’ancien.";
+if(x.indexOf("weak")>-1||x.indexOf("at least")>-1||x.indexOf("short")>-1||x.indexOf("character")>-1)return"Mot de passe trop court ou trop faible (6 caractères minimum).";
+return m||"Modification impossible."}
+$("pw_go").onclick=async function(){var o=$("pw_old").value,n=$("pw_new").value,n2=$("pw_new2").value,m=$("pw_msg");
+if(!S)return;
+if(!o){m.textContent="Entrez votre mot de passe actuel.";return}
+if(n.length<6){m.textContent="Nouveau mot de passe : 6 caractères minimum.";return}
+if(n.length>72){m.textContent="Nouveau mot de passe : 72 caractères maximum.";return}
+if(n!==n2){m.textContent="Les deux nouveaux mots de passe ne sont pas identiques.";return}
+if(n===o){m.textContent="Le nouveau mot de passe doit être différent de l’ancien.";return}
+$("pw_go").disabled=true;m.textContent="Modification…";
+try{var j=await authPw(S.e,o);
+if(!j.access_token){m.textContent="Mot de passe actuel incorrect.";return}
+setS(j);
+var real=await aReal(S.e,o);if(real===null)real=o;
+await aSave(S.e,n,real);
+m.textContent="✅ Mot de passe modifié sur ce téléphone. Le mot de passe du compte n’est pas changé.";["pw_old","pw_new","pw_new2"].forEach(function(i){$(i).value=""})}
+catch(e){m.textContent=(window.crypto&&crypto.subtle)?"Pas de connexion internet.":"Modification impossible sur cet appareil."}
+finally{$("pw_go").disabled=false}};
+/* ---- Changement d’e-mail du propriétaire (alerte après validation Supabase) ---- */
+$("email_go").onclick=async function(){
+var next=$("email_new").value.trim(),pw=$("email_password").value,m=$("email_msg");
+if(!S||!isOwner())return;
+if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(next)){m.textContent="Entrez une adresse e-mail valide.";return}
+if(next.toLowerCase()===String(S.e||"").toLowerCase()){m.textContent="Cette adresse est déjà utilisée par votre compte.";return}
+if(!pw){m.textContent="Entrez votre mot de passe actuel.";return}
+this.disabled=true;m.textContent="Vérification du compte…";
+try{
+var j=await authPw(S.e,pw);
+if(!j.access_token){m.textContent="Mot de passe actuel incorrect.";return}
+setS(j);
+var r=await fetch(SU+"/auth/v1/user",{method:"PUT",headers:{apikey:SK,Authorization:"Bearer "+j.access_token,"Content-Type":"application/json"},body:JSON.stringify({email:next})});
+var d={};try{d=await r.json()}catch(e){}
+if(r.ok){
+m.textContent="✅ Demande envoyée. Confirmez le changement via les messages de Supabase. L’administrateur sera averti lorsque la nouvelle adresse sera validée.";
+$("email_new").value="";$("email_password").value=""
+}else m.textContent=pwErr(d.msg||d.message||d.error_description||"Modification de l’e-mail impossible.")
+}catch(e){m.textContent="Pas de connexion internet."}
+finally{$("email_go").disabled=false}
+};
+/* ---- Excel (.xlsx) sans bibliothèque : écriture et lecture ---- */
+var CRCT=null;
+function crc32(u){if(!CRCT){CRCT=new Uint32Array(256);for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;CRCT[n]=c>>>0}}
+var c2=0xFFFFFFFF;for(var i=0;i<u.length;i++)c2=CRCT[(c2^u[i])&255]^(c2>>>8);return(c2^0xFFFFFFFF)>>>0}
+function u8(s){return new TextEncoder().encode(s)}
+function concat(a){var n=0;a.forEach(function(p){n+=p.length});var o=new Uint8Array(n),i=0;a.forEach(function(p){o.set(p,i);i+=p.length});return o}
+function zipStore(files){var loc=[],cen=[],off=0;
+files.forEach(function(f){var nm=u8(f[0]),d=f[1],crc=crc32(d);
+var h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(12,0x21,true);h.setUint32(14,crc,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nm.length,true);
+loc.push(new Uint8Array(h.buffer),nm,d);
+var c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(14,0x21,true);c.setUint32(16,crc,true);c.setUint32(20,d.length,true);c.setUint32(24,d.length,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+cen.push(new Uint8Array(c.buffer),nm);off+=30+nm.length+d.length});
+var cl=0;cen.forEach(function(p){cl+=p.length});
+var e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cl,true);e.setUint32(16,off,true);
+return concat(loc.concat(cen,[new Uint8Array(e.buffer)]))}
+function colL(i){var s2="";i++;while(i>0){var m=(i-1)%26;s2=String.fromCharCode(65+m)+s2;i=Math.floor((i-1)/26)}return s2}
+function xe(v){return String(v).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function sheetXml(rows,widths){var x='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>';
+widths.forEach(function(w,i){x+='<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'});x+='</cols><sheetData>';
+rows.forEach(function(r,ri){x+='<row r="'+(ri+1)+'">';
+r.forEach(function(v,ci){if(v===null||v===undefined||v==="")return;var ref=colL(ci)+(ri+1);
+if(typeof v==="number"&&isFinite(v))x+='<c r="'+ref+'"><v>'+v+'</v></c>';
+else x+='<c r="'+ref+'" t="inlineStr"'+(ri===0?' s="1"':'')+'><is><t xml:space="preserve">'+xe(v)+'</t></is></c>'});
+x+='</row>'});
+return x+'</sheetData></worksheet>'}
+function opsRows(list){var rows=[["Date","Heure","SIM","Opération","Montant (F)","Frais (F)","Bénéfice (F)","Par","Identifiant","Horodatage"]];
+list.slice().sort(function(a,b){return (a.date+(a.at||"")).localeCompare(b.date+(b.at||""))}).forEach(function(e){
+rows.push([e.date,hh(e),e.sim,TN[e.type==="forf"?"fnet":e.type]||e.type,Number(e.amount)||0,Number(e.frais)||0,Number(e.profit)||0,e.bn||e.by||"",e.id,e.at||""])});return rows}
+function dayRows(list){var rows=[["Date","Dépôts (F)","Retraits (F)","Crédit (F)","Forfait internet (F)","Forfait appel (F)","Bénéfice (F)","Nb opérations"]],days={};
+list.forEach(function(e){(days[e.date]=days[e.date]||[]).push(e)});
+Object.keys(days).sort().forEach(function(d){var r=agg(days[d]);rows.push([d,r.dep.a,r.ret.a,r.cred.a,r.fnet.a,r.fapp.a,Math.round(r.p*100)/100,days[d].length])});return rows}
+function buildXlsx(list){var NS='http://schemas.openxmlformats.org/spreadsheetml/2006/main',RN='http://schemas.openxmlformats.org/officeDocument/2006/relationships',H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+return zipStore([
+["[Content_Types].xml",u8(H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>')],
+["_rels/.rels",u8(H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+RN+'/officeDocument" Target="xl/workbook.xml"/></Relationships>')],
+["xl/workbook.xml",u8(H+'<workbook xmlns="'+NS+'" xmlns:r="'+RN+'"><sheets><sheet name="Opérations" sheetId="1" r:id="rId1"/><sheet name="Résumé par jour" sheetId="2" r:id="rId2"/></sheets></workbook>')],
+["xl/_rels/workbook.xml.rels",u8(H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+RN+'/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="'+RN+'/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="'+RN+'/styles" Target="styles.xml"/></Relationships>')],
+["xl/styles.xml",u8(H+'<styleSheet xmlns="'+NS+'"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>')],
+["xl/worksheets/sheet1.xml",u8(sheetXml(opsRows(list),[12,8,9,26,13,11,13,20,24,26]))],
+["xl/worksheets/sheet2.xml",u8(sheetXml(dayRows(list),[12,13,13,12,18,16,13,14]))]])}
+async function unzip(buf){var d=new DataView(buf),u=new Uint8Array(buf),i=u.length-22;
+while(i>=0&&d.getUint32(i,true)!==0x06054b50)i--;if(i<0)throw new Error("zip");
+var n=d.getUint16(i+10,true),p=d.getUint32(i+16,true),out={};
+for(var k=0;k<n;k++){if(d.getUint32(p,true)!==0x02014b50)throw new Error("zip");
+var meth=d.getUint16(p+10,true),cs=d.getUint32(p+20,true),nl=d.getUint16(p+28,true),el=d.getUint16(p+30,true),cl=d.getUint16(p+32,true),lo=d.getUint32(p+42,true),
+name=new TextDecoder().decode(u.subarray(p+46,p+46+nl)),ln=d.getUint16(lo+26,true),le=d.getUint16(lo+28,true),st=lo+30+ln+le;
+out[name]={m:meth,d:u.subarray(st,st+cs)};p+=46+nl+el+cl}
+return out}
+async function zget(z,name){var f=z[name];if(!f)return null;var b=f.d;
+if(f.m===8){var ds=new DecompressionStream("deflate-raw"),w=ds.writable.getWriter();w.write(b);w.close();b=new Uint8Array(await new Response(ds.readable).arrayBuffer())}
+else if(f.m!==0)throw new Error("zip");
+return new TextDecoder().decode(b)}
+function xmlDoc(t){return new DOMParser().parseFromString(t,"application/xml")}
+function nrm(v){return String(v==null?"":v).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()}
+function colIdx(ref){var m=/^[A-Z]+/.exec(ref)[0],n=0;for(var i=0;i<m.length;i++)n=n*26+m.charCodeAt(i)-64;return n-1}
+async function readXlsx(buf){var z=await unzip(buf),ss=[],t=await zget(z,"xl/sharedStrings.xml");
+if(t){var si=xmlDoc(t).getElementsByTagName("si");for(var i=0;i<si.length;i++){var ts=si[i].getElementsByTagName("t"),s2="";for(var j=0;j<ts.length;j++)s2+=ts[j].textContent;ss.push(s2)}}
+var path="xl/worksheets/sheet1.xml",wb=await zget(z,"xl/workbook.xml"),rl=await zget(z,"xl/_rels/workbook.xml.rels");
+if(wb&&rl){var shs=xmlDoc(wb).getElementsByTagName("sheet"),rid=null;
+for(var a=0;a<shs.length;a++){if(nrm(shs[a].getAttribute("name"))==="operations"){rid=shs[a].getAttribute("r:id");break}}
+if(rid){var rs=xmlDoc(rl).getElementsByTagName("Relationship");for(var b=0;b<rs.length;b++)if(rs[b].getAttribute("Id")===rid){var tg=rs[b].getAttribute("Target")||"";path=tg.charAt(0)==="/"?tg.slice(1):"xl/"+tg.replace(/^\.\//,"");break}}}
+var sx=await zget(z,path);if(!sx)throw new Error("feuille introuvable");
+var rx=xmlDoc(sx).getElementsByTagName("row"),out=[];
+for(var r=0;r<rx.length;r++){var cs2=rx[r].getElementsByTagName("c"),row=[];
+for(var c=0;c<cs2.length;c++){var ce=cs2[c],ci=colIdx(ce.getAttribute("r")||"A1"),ty=ce.getAttribute("t"),v="",ve=ce.getElementsByTagName("v")[0];
+if(ty==="inlineStr"){var tt=ce.getElementsByTagName("t");for(var q=0;q<tt.length;q++)v+=tt[q].textContent}
+else if(ve){v=ve.textContent;if(ty==="s")v=ss[Number(v)]||"";else if(ty!=="str"&&ty!=="b"&&ty!=="e"&&v!==""&&!isNaN(Number(v)))v=Number(v)}
+row[ci]=v}
+out.push(row)}
+return out}
+function isoDay(v){if(typeof v==="number"&&v>20000&&v<80000)return new Date(Math.round((v-25569)*86400000)).toISOString().slice(0,10);
+var t=String(v==null?"":v).trim(),m=/^(\d{4})-(\d{2})-(\d{2})/.exec(t);if(m)return m[1]+"-"+m[2]+"-"+m[3];
+m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(t);if(m)return m[3]+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[1]).slice(-2);return""}
+var impN=0;
+function rowsToOps(rows){var hd=(rows[0]||[]).map(nrm);
+function ix(){for(var a=0;a<arguments.length;a++){var p=hd.indexOf(arguments[a]);if(p>-1)return p}return -1}
+var cD=ix("date"),cH=ix("heure"),cS=ix("sim"),cT=ix("operation"),cA=ix("montant (f)","montant"),cF=ix("frais (f)","frais"),cP=ix("benefice (f)","benefice"),cB=ix("par"),cI=ix("identifiant","id"),cZ=ix("horodatage");
+if(cD<0||cS<0||cT<0||cA<0)return null;
+var T={};Object.keys(TN).forEach(function(k){if(k!=="forf")T[nrm(TN[k])]=k});T["forfait internet"]="fnet";T["forfait appel"]="fapp";
+var ops=[],bad=0,seen={};
+for(var i=1;i<rows.length;i++){var r=rows[i]||[];if(r.every(function(x){return x===""||x==null}))continue;
+var date=isoDay(r[cD]),sim=null,ty=T[nrm(r[cT])],amt=Number(r[cA]);
+SIMS.forEach(function(x){if(nrm(x)===nrm(r[cS]))sim=x});
+if(!date||!sim||!ty||!(amt>=0)||r[cA]===""){bad++;continue}
+var fr=cF>-1&&r[cF]!==""?Number(r[cF]):0;if(!(fr>=0))fr=0;
+var pf=cP>-1&&r[cP]!==""?Number(r[cP]):NaN;if(isNaN(pf))pf=rate(ty,amt,fr);
+var at="",z=cZ>-1?String(r[cZ]||""):"";
+if(z&&!isNaN(new Date(z)))at=new Date(z).toISOString();
+else if(cH>-1&&/^\d{1,2}:\d{2}/.test(String(r[cH]||""))){var d2=new Date(date+"T"+("0"+String(r[cH]).split(":")[0]).slice(-2)+":"+String(r[cH]).split(":")[1].slice(0,2)+":00");if(!isNaN(d2))at=d2.toISOString()}
+var id=cI>-1&&String(r[cI]||"").trim()?String(r[cI]).trim():"imp-"+Date.now()+"-"+(++impN);
+if(seen[id])continue;seen[id]=1;
+ops.push({id:id,date:date,at:at,sim:sim,type:ty,amount:amt,profit:pf,frais:ty==="ret"?fr:0,source:"import",by:S&&S.e||"",bn:cB>-1?String(r[cB]||""):"",synced:false})}
+return{ops:ops,bad:bad}}
+/* ---- Enregistrer le fichier sur le téléphone ---- */
+function b64(u){var s2="",ch=0x8000;for(var i=0;i<u.length;i+=ch)s2+=String.fromCharCode.apply(null,u.subarray(i,i+ch));return btoa(s2)}
+function capP(n){var c=window.Capacitor;return(c&&c.Plugins&&c.Plugins[n])||null}
+async function saveXlsx(name,data,quiet){var FS=capP("Filesystem");
+if(FS){try{await FS.writeFile({path:"CabineMomo/"+name,data:b64(data),directory:"DOCUMENTS",recursive:true});return{ok:1,where:"Documents/CabineMomo/"+name}}catch(e){}
+if(quiet)return{ok:0};
+var SH=capP("Share");
+if(SH){try{var r2=await FS.writeFile({path:name,data:b64(data),directory:"CACHE"});await SH.share({title:name,url:r2.uri,dialogTitle:"Enregistrer le fichier Excel"});return{ok:1,where:"fichier partagé ("+name+")"}}catch(e2){}}}
+if(quiet)return{ok:0};
+try{var bl=new Blob([data],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);return{ok:1,where:"téléchargements ("+name+")"}}catch(e3){return{ok:0}}}
+/* ---- Toutes les données (téléphone + serveur) ---- */
+async function fullList(){var m={};E.forEach(function(x){m[x.id]=x});
+if(navigator.onLine&&S){try{for(var o=0;o<50000;o+=1000){var ac=new AbortController(),tm=setTimeout(function(){ac.abort()},15000),r;
+try{r=await api("operations?select=*&order=date.asc&limit=1000&offset="+o,{signal:ac.signal})}finally{clearTimeout(tm)}
+var j=await r.json();if(!Array.isArray(j))break;
+j.forEach(function(x){if(!m[x.id]&&DEL.indexOf(x.id)<0)m[x.id]={id:x.id,date:x.date,at:x.at||"",sim:x.sim,type:x.type,amount:Number(x.amount),profit:Number(x.profit),frais:Number(x.frais)||0,source:x.source,by:x.by_email||"",bn:x.by_name||"",synced:true}});
+if(j.length<1000)break}}catch(e){}}
+return Object.keys(m).map(function(k){return m[k]})}
+/* ---- Sauvegarde automatique (23h59, heure du Bénin = UTC+1) ---- */
+var BK="cabine_momo_bk",BKS={on:true,last:""},bkBusy=false,bkFail=0;
+try{var b0=JSON.parse(localStorage.getItem(BK)||"null");if(b0&&typeof b0==="object")BKS={on:b0.on!==false,last:String(b0.last||"")}}catch(e){}
+function bkSave(){try{localStorage.setItem(BK,JSON.stringify(BKS))}catch(e){}}
+function beninNow(){return new Date(Date.now()+3600000)}
+function bkTarget(){var n=beninNow(),today=n.toISOString().slice(0,10);
+if(n.getUTCHours()===23&&n.getUTCMinutes()>=59)return today;
+return new Date(n.getTime()-86400000).toISOString().slice(0,10)}
+function frDay(t){return t.slice(8)+"/"+t.slice(5,7)+"/"+t.slice(0,4)}
+function bkMsg(t){$("bk_msg").textContent=t}
+function bkShow(){$("bk_on").checked=BKS.on;$("bk_last").textContent=BKS.on?(BKS.last?"Dernière sauvegarde automatique : "+frDay(BKS.last):"Aucune sauvegarde automatique pour l’instant."):"Sauvegarde automatique désactivée."}
+$("bk_on").onchange=function(){BKS.on=this.checked;bkSave();bkShow();snapPush();if(BKS.on)bkCheck()};
+async function bkCheck(){if(capP("CabineBackup"))return;if(bkBusy||!isOwner()||!BKS.on||Date.now()<bkFail)return;
+var t=bkTarget();if(BKS.last&&BKS.last>=t)return;
+bkBusy=true;
+try{var l=(await fullList()).filter(function(e){return e.date<=t});
+if(!l.length)return;
+var r=await saveXlsx("Cabine-Momo-sauvegarde-"+t+".xlsx",buildXlsx(l),true);
+if(r.ok){BKS.last=t;bkSave();bkMsg("Sauvegarde du "+frDay(t)+" enregistrée : "+r.where)}
+else{bkFail=Date.now()+600000;bkMsg("Sauvegarde automatique impossible : utilisez « Exporter en Excel ».")}}
+catch(e){bkFail=Date.now()+600000}
+finally{bkBusy=false;bkShow()}}
+setInterval(bkCheck,30000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)bkCheck()});
+/* ---- Sauvegarde native Android : l'alarme de 23h59 lit ces données même app fermée ---- */
+var lastSnap=null,snapT=null;
+function snapText(){var c=function(v){return String(v==null?"":v).replace(/[\t\r\n]+/g," ")},t=[];
+E.forEach(function(e){var ty=e.type==="forf"?"fnet":e.type;t.push([e.date,hh(e),e.sim,TN[ty]||ty,Number(e.amount)||0,Number(e.frais)||0,Number(e.profit)||0,e.bn||e.by||"",e.id,e.at||"",ty].map(c).join("\t"))});return t.join("\n")}
+function snapPush(){var P=capP("CabineBackup");if(!P)return;clearTimeout(snapT);
+snapT=setTimeout(function(){try{var on=isOwner()&&BKS.on,d=on?snapText():"",key=(on?"1":"0")+d;if(key===lastSnap)return;lastSnap=key;
+P.configure({enabled:on,data:d}).then(function(r){if(r&&r.last&&r.last!==BKS.last){BKS.last=r.last;bkSave();bkShow()}}).catch(function(){lastSnap=null})}catch(e){}},1500)}
+/* ---- Export / import manuels ---- */
+$("bk_exp").onclick=async function(){var b=this;b.disabled=true;bkMsg("Préparation…");
+try{var l=await fullList();if(!l.length){bkMsg("Aucune donnée à exporter.");return}
+var n=beninNow().toISOString(),name="Cabine-Momo-export-"+n.slice(0,10)+"_"+n.slice(11,13)+"h"+n.slice(14,16)+".xlsx",r=await saveXlsx(name,buildXlsx(l));
+bkMsg(r.ok?"✅ "+l.length+" opération(s) exportée(s) : "+r.where:"Export impossible sur ce téléphone.")}
+catch(e){bkMsg("Export impossible ("+(e&&e.message||e)+").")}
+finally{b.disabled=false}};
+$("bk_imp").onclick=function(){$("bk_file").click()};
+$("bk_file").onchange=async function(){var f=this.files&&this.files[0];this.value="";if(!f)return;bkMsg("Lecture du fichier…");
+try{var res=rowsToOps(await readXlsx(await f.arrayBuffer()));
+if(!res){bkMsg("Fichier non reconnu : utilisez un fichier exporté par l’application (feuille « Opérations »).");return}
+var have={};E.forEach(function(x){have[x.id]=1});
+var fresh=res.ops.filter(function(o){return !have[o.id]}),dup=res.ops.length-fresh.length,bad=res.bad?" "+res.bad+" ligne(s) invalide(s) ignorée(s).":"";
+if(!fresh.length){bkMsg("Rien à importer : "+dup+" opération(s) déjà présente(s)."+bad);return}
+if(!confirm("Importer "+fresh.length+" opération(s) ?"+(dup?"\n"+dup+" déjà présente(s) seront ignorées.":"")+(res.bad?"\n"+res.bad+" ligne(s) invalide(s) seront ignorées.":""))){bkMsg("Import annulé.");return}
+fresh.forEach(function(o){E.push(o)});save();render();
+bkMsg("✅ "+fresh.length+" opération(s) importée(s)"+(dup?", "+dup+" déjà présente(s)":"")+"."+bad)}
+catch(e){bkMsg(e&&e.message==="zip"?"Fichier illisible : ce n’est pas un fichier Excel (.xlsx).":"Fichier illisible ("+(e&&e.message||e)+").")}};
+
+wpInit();thInit();cfgShow();bkShow();uiSync();sync();render();bkCheck();secInit();
 </script>
 </body>
 </html>
