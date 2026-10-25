@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prépare le projet Android généré par Capacitor : signature fixe, version, couleur de fond.
+"""Prépare le projet Android généré par Capacitor : signature par secrets, version, couleur de fond.
 
 Usage : python3 patch_android.py <dossier_android> <numero_de_build>
 """
@@ -38,17 +38,19 @@ if "androidx.biometric:biometric:" not in g:
     if n != 1:
         sys.exit("Bloc dependencies { introuvable dans app/build.gradle")
 
-# Signature fixe : l'APK se met à jour sans désinstaller (les données locales sont conservées)
+# Même clé de signature pour les mises à jour; les mots de passe viennent des secrets d'environnement.
 if "momo.keystore" not in g:
     if not os.path.isfile(keystore):
-        sys.exit("momo.keystore absent : placez-le à la racine du dépôt (même fichier que pour l'APK déjà installé).")
+        sys.exit("Keystore absent : configurez le secret MOMO_KEYSTORE_BASE64 dans GitHub Actions.")
+    if not os.environ.get("MOMO_KEYSTORE_PASSWORD") or not os.environ.get("MOMO_KEY_PASSWORD"):
+        sys.exit("Secrets de signature absents : configurez MOMO_KEYSTORE_PASSWORD et MOMO_KEY_PASSWORD.")
     block = (
         "\n    signingConfigs {\n"
         "        debug {\n"
         '            storeFile file("%s")\n'
-        '            storePassword "momo-cabine"\n'
+        '            storePassword System.getenv("MOMO_KEYSTORE_PASSWORD")\n'
         '            keyAlias "momo"\n'
-        '            keyPassword "momo-cabine"\n'
+        '            keyPassword System.getenv("MOMO_KEY_PASSWORD")\n'
         "        }\n"
         "    }\n" % keystore.replace("\\", "/")
     )

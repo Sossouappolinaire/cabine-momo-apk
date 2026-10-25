@@ -32,6 +32,14 @@ La migration conserve uniquement l’identifiant du propriétaire, son nom d’e
 
 ## Construire l’APK depuis GitHub Actions
 
-Même principe que la version précédente : déposez le contenu de ce dossier dans le dépôt GitHub (en gardant `momo.keystore` et `make_android_assets.py` déjà présents à la racine), puis lancez le workflow. La signature et l’icône sont gérées automatiquement; aucun secret de signature n’est à configurer.
+Le workflow attend ces secrets du dépôt GitHub :
 
-Seule la configuration Firebase est nécessaire pour les notifications : ajoutez `firebase/google-services.json` (package `com.cabine.momo`) au dépôt, ou le secret GitHub `GOOGLE_SERVICES_JSON_BASE64`.
+- `GOOGLE_SERVICES_JSON_BASE64` : contenu encodé en Base64 du `google-services.json` Firebase du package `com.cabine.momo`.
+- `MOMO_KEYSTORE_BASE64` : keystore de signature déjà utilisé pour les mises à jour de cette application, encodé en Base64.
+- `MOMO_KEYSTORE_PASSWORD` et `MOMO_KEY_PASSWORD` : mots de passe correspondants.
+
+Ces secrets se configurent dans **Settings → Secrets and variables → Actions** du dépôt. Le fichier de keystore et ses mots de passe ne doivent jamais être commités. Garder le même keystore est nécessaire pour installer une mise à jour par-dessus l’APK déjà distribué.
+
+Le workflow peut aussi lire `firebase/google-services.json` s’il est présent à cet emplacement au moment du build. Il vérifie que le package Firebase est bien `com.cabine.momo`.
+
+L’archive source fournie ne contenait pas le keystore. Pour mettre à jour une installation existante, il faut retrouver **la même clé de signature que celle de l’APK déjà distribué**. Si cette clé est perdue, une nouvelle clé permet seulement une nouvelle installation; Android n’acceptera pas l’APK comme mise à jour de l’ancienne application.

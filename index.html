@@ -310,10 +310,6 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
 .app-lock-card .lock-secondary{background:transparent;border:0;color:var(--mu);box-shadow:none}
 .security-choice{display:flex;align-items:center;gap:10px;margin:12px 0;padding:13px;border:1px solid var(--bd);border-radius:13px;background:var(--fld);color:var(--tx);font-size:13px}
 .security-choice input{width:18px;min-height:18px;flex:none;margin:0}
-#top_out{margin-left:auto;height:44px;padding:0 14px;border-radius:22px;font-size:13px;font-weight:700;white-space:nowrap;flex:none;background:var(--card);color:var(--tx);border:1px solid var(--bd)}
-#top_out[hidden]{display:none!important}
-#top_out+.gear{margin-left:0}
-#c_out{width:100%;margin:10px 0 4px}
 </style>
 </head>
 <body>
@@ -322,14 +318,12 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
 <div class="top bare" id="top">
   <div class="logo" id="logo" hidden></div>
   <div class="tt" id="tt" hidden><h1 id="biz">Cabine</h1><div class="sub" id="co"></div></div>
-  <button id="top_out" title="Se déconnecter" aria-label="Se déconnecter" hidden>Déconnexion</button>
   <button class="gear" id="gear" title="Paramètres" aria-label="Paramètres">⚙️</button>
 </div>
 <div class="chip" id="st"></div>
 
 <div class="card" id="cfg" hidden>
   <div class="row" style="align-items:center"><div style="flex:0 0 auto"><button id="c_back">← Retour</button></div><h2 style="margin:0;flex:1;text-align:right">Paramètres</h2></div>
-  <button id="c_out" hidden>Se déconnecter</button>
   <div id="acct" hidden>
     <h2>Mon compte</h2>
     <div class="hint" id="ac_who" style="margin:0 0 8px"></div>
@@ -404,6 +398,7 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
   <div class="sep"></div>
   <h2>Apparence</h2>
   <select id="th" aria-label="Apparence"><option value="auto">Automatique (comme le téléphone)</option><option value="light">Clair</option><option value="dark">Sombre</option></select>
+  <button id="c_out" style="margin-top:14px" hidden>Se déconnecter</button>
 </div>
 
 <div class="brand" id="brand" hidden>
@@ -566,24 +561,13 @@ async function logout(){if(E.some(function(x){return !x.synced})&&!confirm("Des 
 if(isAdmin()&&pushToken){try{await adminPushApi("unregister",{token:pushToken})}catch(e){}}
 if(isAdmin()&&PUSH){try{await PUSH.unregister()}catch(e){}}
 pushToken="";setS(null);inCfg=false;uiSync();render()}
-$("c_out").onclick=logout;$("top_out").onclick=logout;$("a_out").onclick=logout;$("b_out").onclick=logout;
+$("c_out").onclick=logout;$("a_out").onclick=logout;$("b_out").onclick=logout;
 function persistDel(){try{localStorage.setItem(DK,JSON.stringify(DEL))}catch(e){}}
 function setS(j){
 if(!(j&&j.access_token)){S=null}
 else{S=fromTok(j.access_token,S||{e:j.user&&j.user.email});S.a=j.access_token;S.r=j.refresh_token;S.x=Math.floor(Date.now()/1000)+(j.expires_in||3600)}
 try{if(S)localStorage.setItem(SS,JSON.stringify(S));else localStorage.removeItem(SS)}catch(e2){}}
 function auth(g,b){return fetch(SU+"/auth/v1/token?grant_type="+g,{method:"POST",headers:{apikey:SK,"Content-Type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json()})}
-/* ---- Mot de passe personnel (alias) : le mot de passe Supabase ne change jamais ---- */
-var AK="cabine_momo_alias";
-function b64(u){var t="";for(var i=0;i<u.length;i++)t+=String.fromCharCode(u[i]);return btoa(t)}
-function unb64(t){var b=atob(t),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
-function aGet(){try{return JSON.parse(localStorage.getItem(AK)||"{}")||{}}catch(e){return{}}}
-function aSet(m){try{localStorage.setItem(AK,JSON.stringify(m))}catch(e){}}
-function aId(em){return String(em||"").trim().toLowerCase()}
-async function aKey(pw,salt){var km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:100000,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
-async function aSave(em,alias,real){var m=aGet(),k=aId(em);if(alias===real){delete m[k]}else{var salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),key=await aKey(alias,salt),ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(real));m[k]={s:b64(salt),i:b64(iv),d:b64(new Uint8Array(ct))}}aSet(m)}
-async function aReal(em,typed){var e=aGet()[aId(em)];if(!e||!window.crypto||!crypto.subtle)return null;try{var key=await aKey(typed,unb64(e.s)),pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(e.i)},key,unb64(e.d));return new TextDecoder().decode(pt)}catch(x){return null}}
-async function authPw(em,typed){if(aGet()[aId(em)]){var real=await aReal(em,typed);if(real===null)return{error_code:"invalid_credentials"};var j=await auth("password",{email:em,password:real});if(j.access_token)return j;var m=aGet();delete m[aId(em)];aSet(m);return auth("password",{email:em,password:typed})}return auth("password",{email:em,password:typed})}
 async function token(){if(!S)return null;if(S.x-60>Date.now()/1000)return S.a;
 try{var j=await auth("refresh_token",{refresh_token:S.r});if(j.access_token){setS(j);return S.a}if(j.error_code||j.error){setS(null);uiSync()}}catch(e){}return null}
 async function api(path,opt){var t=await token();if(!t)throw new Error("auth");opt=opt||{};opt.headers=Object.assign({apikey:SK,Authorization:"Bearer "+t,"Content-Type":"application/json"},opt.headers||{});return fetch(SU+"/rest/v1/"+path,opt)}
@@ -596,7 +580,7 @@ var j={};try{j=await r.json()}catch(e){j={}}
 if(!r.ok&&!j.error)j.error=r.status===401?"Session expirée : reconnectez-vous.":r.status===404?NOFN:(j.message||j.msg||"Erreur "+r.status);
 return j}finally{clearTimeout(tm)}}
 function applyRole(){var r=S?S.role:"",role=!S?"":r==="admin"?"a":r==="owner"?"o":r==="employee"?"e":"x",shop=role==="o"||role==="e",co=coName();
-$("login").hidden=!!S||inCfg;$("brand").hidden=!!S||inCfg;$("app").hidden=!S||inCfg;$("cfg").hidden=!inCfg;$("acct").hidden=!S;$("bkp").hidden=role!=="o";$("tt").hidden=!S;$("top").className=S?"top":"top bare";$("c_out").hidden=!S;$("top_out").hidden=!S;
+$("login").hidden=!!S||inCfg;$("brand").hidden=!!S||inCfg;$("app").hidden=!S||inCfg;$("cfg").hidden=!inCfg;$("acct").hidden=!S;$("bkp").hidden=role!=="o";$("tt").hidden=!S;$("top").className=S?"top":"top bare";$("c_out").hidden=!S;
 $("admin").hidden=role!=="a";$("bad").hidden=role!=="x";$("shop").hidden=!shop;
 $("own").hidden=role!=="o";$("empc").hidden=role!=="o";$("form").hidden=role!=="e";
 $("logo").hidden=!shop;$("logo").textContent=ini(co);
@@ -632,7 +616,7 @@ if(add)persist();syncErr=false;syncMsg=""}else{syncErr=true;syncMsg="Lecture ref
 }catch(err){syncErr=true;if(err!==0)syncMsg="Erreur ("+(err&&err.message||err)+")"}
 busy=false;uiSync();render()}
 var logging=false;$("l_go").onclick=async function(){if(logging)return;logging=true;$("l_go").disabled=true;$("l_msg").textContent="Connexion…";
-try{var j=await authPw($("l_em").value.trim(),$("l_pw").value);
+try{var j=await auth("password",{email:$("l_em").value.trim(),password:$("l_pw").value});
 if(j.access_token){var em=String((j.user&&j.user.email)||$("l_em").value.trim()).toLowerCase(),last="";
 try{last=localStorage.getItem(LK)||""}catch(e){}
 if(last&&last!==em){if(E.some(function(x){return !x.synced})&&!confirm("Des opérations de "+last+" ne sont pas encore envoyées et seront perdues. Continuer ?")){$("l_msg").textContent="Connexion annulée.";return}
@@ -912,13 +896,14 @@ if(n.length>72){m.textContent="Nouveau mot de passe : 72 caractères maximum.";r
 if(n!==n2){m.textContent="Les deux nouveaux mots de passe ne sont pas identiques.";return}
 if(n===o){m.textContent="Le nouveau mot de passe doit être différent de l’ancien.";return}
 $("pw_go").disabled=true;m.textContent="Modification…";
-try{var j=await authPw(S.e,o);
+try{var j=await auth("password",{email:S.e,password:o});
 if(!j.access_token){m.textContent="Mot de passe actuel incorrect.";return}
 setS(j);
-var real=await aReal(S.e,o);if(real===null)real=o;
-await aSave(S.e,n,real);
-m.textContent="✅ Mot de passe modifié sur ce téléphone. Le mot de passe du compte n’est pas changé.";["pw_old","pw_new","pw_new2"].forEach(function(i){$(i).value=""})}
-catch(e){m.textContent=(window.crypto&&crypto.subtle)?"Pas de connexion internet.":"Modification impossible sur cet appareil."}
+var r=await fetch(SU+"/auth/v1/user",{method:"PUT",headers:{apikey:SK,Authorization:"Bearer "+j.access_token,"Content-Type":"application/json"},body:JSON.stringify({password:n})});
+var d={};try{d=await r.json()}catch(e){}
+if(r.ok){m.textContent="✅ Mot de passe modifié. Utilisez-le à la prochaine connexion.";["pw_old","pw_new","pw_new2"].forEach(function(i){$(i).value=""})}
+else m.textContent=pwErr(d.msg||d.message||d.error_description||"")}
+catch(e){m.textContent="Pas de connexion internet."}
 finally{$("pw_go").disabled=false}};
 /* ---- Changement d’e-mail du propriétaire (alerte après validation Supabase) ---- */
 $("email_go").onclick=async function(){
@@ -929,7 +914,7 @@ if(next.toLowerCase()===String(S.e||"").toLowerCase()){m.textContent="Cette adre
 if(!pw){m.textContent="Entrez votre mot de passe actuel.";return}
 this.disabled=true;m.textContent="Vérification du compte…";
 try{
-var j=await authPw(S.e,pw);
+var j=await auth("password",{email:S.e,password:pw});
 if(!j.access_token){m.textContent="Mot de passe actuel incorrect.";return}
 setS(j);
 var r=await fetch(SU+"/auth/v1/user",{method:"PUT",headers:{apikey:SK,Authorization:"Bearer "+j.access_token,"Content-Type":"application/json"},body:JSON.stringify({email:next})});
