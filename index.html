@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cabine Momo</title>
+<title>Cabine</title>
 <style>
 :root{--bg:#f6f7f9;--card:#fff;--tx:#14181f;--mu:#667085;--bd:#e3e6ec;--ac:#0b7a4b;--ac2:#e7f5ee;--dg:#c0392b;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -11,9 +11,14 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 :root[data-theme="dark"]{--bg:#10141a;--card:#1a2029;--tx:#eef1f5;--mu:#9aa4b2;--bd:#2a3340;--ac:#3ecf8e;--ac2:#16302a;--dg:#ff7b6b}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{max-width:560px;margin:0 auto;padding:14px}
-h1{font-size:20px;margin:4px 0 12px}
+h1{font-size:20px;margin:0}
+.top{display:flex;align-items:center;gap:10px;margin:2px 0 6px}
+.tt{flex:1;min-width:0}.sub{font-size:13px;color:var(--mu)}
+.logo{width:44px;height:44px;border-radius:50%;background:var(--ac);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.gear{width:auto;padding:6px 10px;flex:none}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
 .row{display:flex;gap:8px;margin-bottom:8px}.row>*{flex:1;min-width:0}
 label{display:block;font-size:12px;color:var(--mu);margin-bottom:3px}
@@ -24,6 +29,7 @@ button.p{background:var(--ac);color:#fff;border:0;font-weight:600}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .k{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px}
 .k small{color:var(--mu);display:block;font-size:12px}.k b{font-size:18px}.k span{color:var(--mu);font-size:12px;display:block}
+.k.w{grid-column:1/-1}
 .k.big{grid-column:1/-1;background:var(--ac2);border-color:var(--ac)}.k.big b{font-size:26px;color:var(--ac)}
 .sc{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -31,16 +37,21 @@ th,td{padding:7px 6px;text-align:right;border-bottom:1px solid var(--bd);white-s
 th:first-child,td:first-child{text-align:left}th{color:var(--mu);font-weight:600}
 .it{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)}
 .it:last-child{border:0}.it small{color:var(--mu);display:block}
-.x{width:auto;padding:4px 10px;color:var(--dg);background:none}
+.x{width:auto;padding:4px 10px;color:var(--dg);background:none;flex:none}
+.x.n{color:var(--ac)}
 h2{font-size:15px;margin:0 0 8px}.em{color:var(--mu);text-align:center;padding:8px}
-.gear{width:auto;padding:6px 10px;float:right}textarea{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px;width:100%;min-height:80px}.hint{font-size:12px;color:var(--mu);margin-top:6px}
-dialog{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:14px;width:min(92vw,420px);padding:14px}dialog::backdrop{background:rgba(0,0,0,.5)}
+.hint{font-size:12px;color:var(--mu);margin-top:6px}
+.cr{background:var(--ac2);border:1px solid var(--ac);border-radius:10px;padding:10px;margin-top:8px;word-break:break-all;font-size:13px}
+.cr button{margin-top:8px}
 </style>
 </head>
 <body>
 <main>
-<button class="gear" id="gear" title="Paramètres">⚙️</button>
-<h1 id="biz">📱 Cabine Momo</h1>
+<div class="top">
+  <div class="logo" id="logo" hidden></div>
+  <div class="tt"><h1 id="biz">Cabine</h1><div class="sub" id="co"></div></div>
+  <button class="gear" id="gear" title="Paramètres" hidden>⚙️</button>
+</div>
 <div class="hint" id="st"></div>
 <div class="card" id="login" hidden>
   <h2>Connexion</h2>
@@ -48,160 +59,265 @@ dialog{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-
   <div class="row"><div><label>Mot de passe</label><input id="l_pw" type="password" autocomplete="current-password"></div></div>
   <button class="p" id="l_go">Se connecter</button><div class="hint" id="l_msg"></div>
 </div>
-<div class="card" id="cfg" hidden>
-  <h2>Paramètres (administrateur)</h2>
-  <div class="row"><div><label>Nom de l’entreprise</label><input id="c_name"></div></div>
-  <div class="row"><div><label>Numéro MTN</label><input id="c_mtn" type="tel" inputmode="tel"></div><div><label>Numéro Moov</label><input id="c_moov" type="tel" inputmode="tel"></div></div>
-  <div class="row"><div><label>Numéro Celtis</label><input id="c_cel" type="tel" inputmode="tel"></div></div>
-  <div class="row"><div><label>Commission dépôt (%)</label><input id="c_rd" type="number" step="0.01" min="0"></div><div><label>Commission retrait (%)</label><input id="c_rr" type="number" step="0.01" min="0"></div><div><label>Commission crédit (%)</label><input id="c_rc" type="number" step="0.01" min="0"></div></div>
-  <button class="p" id="c_save">Enregistrer les paramètres</button>
+<div id="app" hidden>
+
+<div id="admin" hidden>
+  <div class="card">
+    <h2>Créer un compte propriétaire</h2>
+    <div class="row"><div><label>Nom de l’entreprise</label><input id="a_name"></div></div>
+    <div class="row"><div><label>E-mail du propriétaire (vide = généré)</label><input id="a_em" type="email" placeholder="généré automatiquement"></div></div>
+    <div class="row"><div><label>Mot de passe</label><input id="a_pw" type="text" autocomplete="off"></div><div style="flex:0 0 auto;align-self:flex-end"><button id="a_gen">Générer</button></div></div>
+    <button class="p" id="a_go">Créer le compte propriétaire</button>
+    <div id="a_msg"></div>
+  </div>
+  <div class="card"><h2>Comptes propriétaires</h2><div id="owners"></div></div>
+  <button id="a_out">Se déconnecter</button>
 </div>
 
-<div class="card">
+<div id="bad" hidden>
+  <div class="card"><h2>Compte non configuré</h2>
+    <div class="hint">Ce compte n’a pas de rôle (administrateur, propriétaire ou employé). Contactez l’administrateur.</div>
+    <button id="b_out" style="margin-top:10px">Se déconnecter</button></div>
+</div>
+
+<div id="shop" hidden>
+<div class="card" id="cfg" hidden>
+  <div id="own">
+    <h2>Paramètres</h2>
+    <div class="row"><div><label>Numéro MTN</label><input id="c_mtn" type="tel" inputmode="tel"></div><div><label>Numéro Moov</label><input id="c_moov" type="tel" inputmode="tel"></div></div>
+    <div class="row"><div><label>Numéro Celtis</label><input id="c_cel" type="tel" inputmode="tel"></div></div>
+    <div class="row"><div><label>Dépôt : F pour 1000 F</label><input id="c_qd" type="number" step="0.01" min="0" placeholder="3"></div><div><label>Retrait : % des frais</label><input id="c_qr" type="number" step="0.01" min="0" placeholder="47"></div><div><label>Crédit/forfait : F pour 100 F</label><input id="c_qc" type="number" step="0.01" min="0" placeholder="4"></div></div>
+    <button class="p" id="c_save">Enregistrer les paramètres</button>
+  </div>
+  <button id="c_out" style="margin-top:12px">Se déconnecter</button>
+</div>
+
+<div class="card" id="empc" hidden>
+  <h2>Créer un compte employé</h2>
+  <div class="row"><div><label>Prénom</label><input id="e_pn" autocomplete="off"></div><div><label>Nom</label><input id="e_nm" autocomplete="off"></div></div>
+  <div class="row"><div><label>E-mail (vide = généré)</label><input id="e_em" type="email" placeholder="généré automatiquement"></div></div>
+  <div class="row"><div><label>Mot de passe</label><input id="e_pw" type="text" autocomplete="off"></div><div style="flex:0 0 auto;align-self:flex-end"><button id="e_gen">Générer</button></div></div>
+  <button class="p" id="e_go">Créer un compte employé</button>
+  <div id="e_msg"></div>
+  <h2 style="margin-top:14px">Mes employés</h2>
+  <div id="emps"></div>
+</div>
+
+<div class="card" id="form" hidden>
   <div class="row">
     <div><label>SIM</label><select id="sim"><option>MTN</option><option>Moov</option><option>Celtis</option></select></div>
-    <div><label>Opération</label><select id="type"><option value="dep">Dépôt</option><option value="ret">Retrait</option><option value="cred">Crédit / forfait</option></select></div>
+    <div><label>Opération</label><select id="type"></select></div>
   </div>
   <div class="row">
     <div><label>Montant (F)</label><input id="amt" type="number" inputmode="numeric" min="0" placeholder="0"></div>
-    <div><label>Commission (F) — vide = auto</label><input id="pro" type="number" inputmode="numeric" min="0" placeholder="auto"></div>
+    <div id="fr_w" hidden><label>Frais de retrait (F)</label><input id="fr" type="number" inputmode="numeric" min="0" placeholder="0"></div>
   </div>
   <button class="p" id="add">Enregistrer</button>
 </div>
 
-<div class="card"><h2>Coller des SMS</h2>
-  <textarea id="sms" placeholder="Collez ici un ou plusieurs SMS de confirmation…"></textarea>
-  <button class="p" id="smsb" style="margin-top:8px">Lire et enregistrer</button>
-  <div class="hint" id="smsr">La commission est calculée avec les pourcentages des paramètres ⚙️.</div></div>
 <div class="tabs"><button id="t1" class="on">Jour</button><button id="t2">Mois</button></div>
 <div id="v1"></div>
 <div id="v2" hidden></div>
 <p class="em">Les données sont enregistrées sur ce téléphone, puis envoyées en ligne dès que la connexion revient.</p>
+</div>
+</div>
 </main>
-<dialog id="dlg">
-  <h2>SMS non reconnu : saisie manuelle</h2>
-  <div class="hint" id="d_raw" style="margin:0 0 8px"></div>
-  <div class="row"><div><label>SIM</label><select id="d_sim"><option>MTN</option><option>Moov</option><option>Celtis</option></select></div><div><label>Opération</label><select id="d_type"><option value="dep">Dépôt</option><option value="ret">Retrait</option><option value="cred">Crédit / forfait</option></select></div></div>
-  <div class="row"><div><label>Montant (F)</label><input id="d_amt" type="number" inputmode="numeric" min="0"></div><div><label>Frais (F)</label><input id="d_frais" type="number" inputmode="numeric" min="0"></div></div>
-  <div class="row"><div><label>Commission (F), vide = auto</label><input id="d_pro" type="number" inputmode="numeric" min="0"></div><div><label>Date</label><input id="d_date" type="date"></div></div>
-  <div class="row"><button class="p" id="d_ok">Enregistrer</button><button id="d_no">Ignorer</button></div>
-</dialog>
 <script>
-var KEY="cabine_momo_v1",E=[];
+var NAME="Cabine",DOM="cabine.app",KEY="cabine_momo_v1",E=[];
 try{E=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){E=[]}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(E))}catch(e){}}
 function save(){persist();setTimeout(sync,0)}
 function td(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 var day=td(),mon=td().slice(0,7),$=function(i){return document.getElementById(i)};
-var SIMS=["MTN","Moov","Celtis"],TN={dep:"Dépôt",ret:"Retrait",cred:"Crédit/forfait"};
+var SIMS=["MTN","Moov","Celtis"],TN={dep:"Dépôt",ret:"Retrait",cred:"Achat de crédit",fnet:"Achat de forfait internet",fapp:"Achat de forfait appel",forf:"Achat de forfait internet"};
+var CK="cabine_momo_cfg",C={};
+try{C=JSON.parse(localStorage.getItem(CK)||"{}")}catch(e){C={}}
+var SU="https://ujuiblvtiaknnwjrugki.supabase.co",SK="sb_publishable_ZzBma-mTfltcaHtqQutKyw_s49OB69V",SS="cabine_momo_sess",DK="cabine_momo_del",LK="cabine_momo_last",S=null,DEL=[],busy=false,pd=true,lastRole="?";
+try{S=JSON.parse(localStorage.getItem(SS)||"null")}catch(e){S=null}
+try{DEL=JSON.parse(localStorage.getItem(DK)||"[]")}catch(e){DEL=[]}
+function jwtp(t){try{return JSON.parse(atob(String(t).split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))}catch(e){return{}}}
+function fromTok(t,old){var p=jwtp(t),m=p.app_metadata||{};
+return{e:String(p.email||(old&&old.e)||"").toLowerCase(),u:p.sub||"",role:m.role||"",pn:m.prenom||"",nm:m.nom||"",co:m.role==="owner"?(m.name||""):(m.company||"")}}
+if(S){var o0=fromTok(S.a,S);for(var k0 in o0)S[k0]=o0[k0]}
+function isOwner(){return !!S&&S.role==="owner"}
+function isEmp(){return !!S&&S.role==="employee"}
+function isAdmin(){return !!S&&S.role==="admin"}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function f(n){return Number(n).toLocaleString("fr-FR")+" F"}
-function agg(l){var r={dep:{n:0,a:0},ret:{n:0,a:0},cred:{n:0,a:0},p:0};
-l.forEach(function(e){r[e.type].n++;r[e.type].a+=e.amount;r.p+=e.profit});return r}
-function cards(r){return '<div class="grid">'+
-'<div class="k"><small>Dépôts</small><b>'+f(r.dep.a)+'</b><span>'+r.dep.n+' opération(s)</span></div>'+
-'<div class="k"><small>Retraits</small><b>'+f(r.ret.a)+'</b><span>'+r.ret.n+' opération(s)</span></div>'+
-'<div class="k"><small>Crédit / forfait</small><b>'+r.cred.n+' vente(s)</b><span>'+f(r.cred.a)+'</span></div>'+
-'<div class="k big"><small>Bénéfice</small><b>'+f(r.p)+'</b></div></div>'}
-function simTable(l){var h='<div class="card sc"><h2>Par SIM</h2><table><tr><th>SIM</th><th>Dépôts</th><th>Retraits</th><th>Crédit</th><th>Bénéf.</th></tr>';
+function hh(e){if(!e.at)return"";var d=new Date(e.at);return isNaN(d)?"":d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
+function dd(e){return e.date.slice(8)+"/"+e.date.slice(5,7)+"/"+e.date.slice(0,4)}
+function ord(a,b){return (b.date+(b.at||"")).localeCompare(a.date+(a.at||""))}
+function coName(){return (S&&S.co)||NAME}
+function fullName(){return S?((S.pn||"")+" "+(S.nm||"")).trim():""}
+function ini(n){var w=String(n||"").trim().split(/\s+/).filter(Boolean);if(!w.length)return"?";var a=w[0].charAt(0),b=w.length>1?w[w.length-1].charAt(0):(w[0].charAt(1)||"");return(a+b).toUpperCase()}
+function slug(s){return String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,".").replace(/^\.+|\.+$/g,"")}
+function gen(){var a="abcdefghjkmnpqrstuvwxyz23456789",r="",u=new Uint8Array(8);crypto.getRandomValues(u);for(var i=0;i<8;i++)r+=a.charAt(u[i]%a.length);return r}
+var RD={dep:3,ret:47,cred:4};
+function q(t){var k=(t==="fnet"||t==="fapp"||t==="forf")?"cred":t,v=parseFloat(C["q_"+k]);return isNaN(v)?RD[k]:v}
+function rate(t,a,fr){var r=t==="dep"?a*q(t)/1000:t==="ret"?(fr||0)*q(t)/100:a*q(t)/100;return Math.round(r*100)/100}
+function agg(l){var r={dep:{n:0,a:0},ret:{n:0,a:0},cred:{n:0,a:0},fnet:{n:0,a:0},fapp:{n:0,a:0},p:0};
+l.forEach(function(e){var t=e.type==="forf"?"fnet":e.type,x=r[t];if(!x)return;x.n++;x.a+=e.amount;r.p+=e.profit});return r}
+function kc(t,x,w){return '<div class="k'+(w?' w':'')+'"><small>'+t+'</small><b>'+f(x.a)+'</b><span>'+x.n+' opération(s)</span></div>'}
+function cards(r){var h='<div class="grid">'+kc("Dépôts",r.dep)+kc("Retraits",r.ret)+kc("Achat de crédit",r.cred)+kc("Forfait internet",r.fnet)+kc("Forfait appel",r.fapp,true);
+if(isOwner())h+='<div class="k big"><small>Bénéfice</small><b>'+f(r.p)+'</b></div>';
+return h+'</div>'}
+function simTable(l){var o=isOwner(),h='<div class="card sc"><h2>Par SIM</h2><table><tr><th>SIM</th><th>Dépôts</th><th>Retraits</th><th>Crédit</th><th>Forfaits</th>'+(o?'<th>Bénéf.</th>':'')+'</tr>';
 SIMS.forEach(function(s){var r=agg(l.filter(function(e){return e.sim===s}));
-h+='<tr><td>'+s+(C[s]?'<br><small style="color:var(--mu)">'+C[s]+'</small>':'')+'</td><td>'+f(r.dep.a)+'</td><td>'+f(r.ret.a)+'</td><td>'+f(r.cred.a)+'</td><td>'+f(r.p)+'</td></tr>'});
+h+='<tr><td>'+s+(C[s]?'<br><small style="color:var(--mu)">'+esc(C[s])+'</small>':'')+'</td><td>'+f(r.dep.a)+'</td><td>'+f(r.ret.a)+'</td><td>'+f(r.cred.a)+'</td><td>'+f(r.fnet.a+r.fapp.a)+'</td>'+(o?'<td>'+f(r.p)+'</td>':'')+'</tr>'});
 return h+'</table></div>'}
-function render(){
-var dl=E.filter(function(e){return e.date===day});
+function itemHtml(e,full){var o=isOwner(),w=[f(e.amount)];
+if(o)w.push("bénéfice "+f(e.profit));
+if(e.frais)w.push("frais "+f(e.frais));
+if(o&&(e.bn||e.by))w.push("par "+esc(e.bn||e.by));
+var t=(full?dd(e)+" ":"")+(hh(e)?(full?"à ":"")+hh(e)+" · ":"");
+return '<div class="it"><div><b>'+t+e.sim+' · '+(TN[e.type]||e.type)+'</b><small>'+w.join(" · ")+'</small></div>'+((!full&&(o||!e.synced))?'<button class="x" data-id="'+e.id+'">Suppr.</button>':'')+'</div>'}
+function render(){var o=isOwner();
+var dl=E.filter(function(e){return e.date===day}).sort(ord);
 var h='<div class="card"><label>Date</label><input type="date" id="dp" value="'+day+'"></div>'+cards(agg(dl))+simTable(dl);
 h+='<div class="card"><h2>Opérations du jour</h2>';
 if(!dl.length)h+='<div class="em">Aucune opération.</div>';
-dl.slice().reverse().forEach(function(e){h+='<div class="it"><div><b>'+e.sim+' · '+TN[e.type]+'</b><small>'+f(e.amount)+' · bénéfice '+f(e.profit)+(e.frais?' · frais '+f(e.frais):'')+'</small></div><button class="x" data-id="'+e.id+'">Suppr.</button></div>'});
+dl.forEach(function(e){h+=itemHtml(e,false)});
 $("v1").innerHTML=h+'</div>';
-var ml=E.filter(function(e){return e.date.slice(0,7)===mon});
+var ml=E.filter(function(e){return e.date.slice(0,7)===mon}).sort(ord);
 var m='<div class="card"><label>Mois</label><input type="month" id="mp" value="'+mon+'"></div>'+cards(agg(ml))+simTable(ml);
 var days={};ml.forEach(function(e){(days[e.date]=days[e.date]||[]).push(e)});
-m+='<div class="card sc"><h2>Bénéfice par jour</h2>';
+m+='<div class="card sc"><h2>'+(o?'Bénéfice par jour':'Total par jour')+'</h2>';
 var ks=Object.keys(days).sort().reverse();
 if(!ks.length)m+='<div class="em">Aucune donnée ce mois-ci.</div>';
-else{m+='<table><tr><th>Jour</th><th>Dépôts</th><th>Retraits</th><th>Bénéf.</th></tr>';
-ks.forEach(function(k){var r=agg(days[k]);m+='<tr><td>'+k.slice(8)+'/'+k.slice(5,7)+'</td><td>'+f(r.dep.a)+'</td><td>'+f(r.ret.a)+'</td><td>'+f(r.p)+'</td></tr>'});m+='</table>'}
-$("v2").innerHTML=m+'</div>';
+else{m+='<table><tr><th>Jour</th><th>Dépôts</th><th>Retraits</th><th>Crédit</th><th>Forfaits</th>'+(o?'<th>Bénéf.</th>':'')+'</tr>';
+ks.forEach(function(d){var r=agg(days[d]);m+='<tr><td>'+d.slice(8)+'/'+d.slice(5,7)+'</td><td>'+f(r.dep.a)+'</td><td>'+f(r.ret.a)+'</td><td>'+f(r.cred.a)+'</td><td>'+f(r.fnet.a+r.fapp.a)+'</td>'+(o?'<td>'+f(r.p)+'</td>':'')+'</tr>'});m+='</table>'}
+m+='</div>';
+if(o&&ml.length){m+='<div class="card"><h2>Détail des opérations (date et heure)</h2>';
+ml.slice(0,200).forEach(function(e){m+=itemHtml(e,true)});
+if(ml.length>200)m+='<div class="em">200 dernières opérations affichées sur '+ml.length+'.</div>';
+m+='</div>'}
+$("v2").innerHTML=m;
 var dp=$("dp"),mp=$("mp");
 if(dp)dp.onchange=function(){day=dp.value||td();render()};
 if(mp)mp.onchange=function(){mon=mp.value||td().slice(0,7);render()};
 }
+function tchg(){$("fr_w").hidden=$("type").value!=="ret"}
+$("type").onchange=tchg;
 $("add").onclick=function(){
-var a=parseFloat($("amt").value),p=$("pro").value===""?rate($("type").value,a):(parseFloat($("pro").value)||0);
+var ty=$("type").value,a=parseFloat($("amt").value),fr=parseFloat($("fr").value)||0;
 if(!(a>=0)||$("amt").value===""){$("amt").focus();return}
-E.push({id:Date.now()+"",date:day,sim:$("sim").value,type:$("type").value,amount:a,profit:p,source:"manuel"});
-save();$("amt").value="";$("pro").value="";render();$("amt").focus()};
+if(ty==="ret"&&$("fr").value===""){$("fr").focus();return}
+E.push({id:Date.now()+"-"+Math.random().toString(36).slice(2,6),date:td(),at:new Date().toISOString(),sim:$("sim").value,type:ty,amount:a,profit:rate(ty,a,fr),frais:ty==="ret"?fr:0,source:"manuel",by:S&&S.e,bn:fullName()});
+day=td();mon=td().slice(0,7);
+save();$("amt").value="";$("fr").value="";render();$("amt").focus()};
 $("v1").onclick=function(ev){var id=ev.target.getAttribute("data-id");
 if(id&&confirm("Supprimer cette opération ?")){var d=E.filter(function(e){return e.id===id})[0];if(d&&d.synced){DEL.push(id);persistDel()}E=E.filter(function(e){return e.id!==id});save();render()}};
 function tab(n){$("v1").hidden=n!==1;$("v2").hidden=n!==2;$("t1").className=n===1?"on":"";$("t2").className=n===2?"on":""}
 $("t1").onclick=function(){tab(1)};$("t2").onclick=function(){tab(2)};
-var CK="cabine_momo_cfg",C={};
-try{C=JSON.parse(localStorage.getItem(CK)||"{}")}catch(e){C={}}
-function rate(t,a){var q=parseFloat(C["r_"+t])||0;return Math.round(a*q)/100}
-function cfgShow(){$("c_name").value=C.name||"";$("c_mtn").value=C.MTN||"";$("c_moov").value=C.Moov||"";$("c_cel").value=C.Celtis||"";$("c_rd").value=C.r_dep||"";$("c_rr").value=C.r_ret||"";$("c_rc").value=C.r_cred||"";$("biz").textContent="📱 "+(C.name||"Cabine Momo")}
+function cfgShow(){$("c_mtn").value=C.MTN||"";$("c_moov").value=C.Moov||"";$("c_cel").value=C.Celtis||"";$("c_qd").value=C.q_dep||"";$("c_qr").value=C.q_ret||"";$("c_qc").value=C.q_cred||""}
 $("gear").onclick=function(){$("cfg").hidden=!$("cfg").hidden};
-$("c_save").onclick=function(){C={name:$("c_name").value.trim(),MTN:$("c_mtn").value.trim(),Moov:$("c_moov").value.trim(),Celtis:$("c_cel").value.trim(),r_dep:$("c_rd").value,r_ret:$("c_rr").value,r_cred:$("c_rc").value};
+$("c_save").onclick=function(){C={t:1,MTN:$("c_mtn").value.trim(),Moov:$("c_moov").value.trim(),Celtis:$("c_cel").value.trim(),q_dep:$("c_qd").value,q_ret:$("c_qr").value,q_cred:$("c_qc").value};
 try{localStorage.setItem(CK,JSON.stringify(C))}catch(e){}cfgShow();$("cfg").hidden=true;pd=true;render();sync()};
-cfgShow();if(!C.name)$("cfg").hidden=false;
-function num(x){return parseFloat(String(x).replace(/[\s.,]/g,""))||0}
-function parseSms(t){
-var m=t.match(/(Retrait|D[ée]p[ôo]t|Cr[ée]dit|Forfait|Recharge)\s+([\d\s.,]+?)\s*F/i);
-if(!m)return null;
-var k=m[1].toLowerCase(),type=k.charAt(0)==="d"?"dep":(k.indexOf("retrait")===0?"ret":"cred");
-var g=function(re){var x=t.match(re);return x?x[1]:""};
-return{type:type,amount:num(m[2]),frais:num(g(/Frais\s*:?\s*([\d\s.,]+?)\s*F/i)),ref:g(/ID\s*:?\s*(\d+)/i),date:g(/(\d{4}-\d{2}-\d{2})/)||td(),
-sim:/moov/i.test(t)?"Moov":/celtis/i.test(t)?"Celtis":/momo|mtn/i.test(t)?"MTN":$("sim").value}}
-$("smsb").onclick=function(){
-var parts=$("sms").value.split(/(?=(?:Retrait|D[ée]p[ôo]t)\s+\d)/i),ok=0,dup=0,bad=0,last="";
-parts.forEach(function(t){if(!t.trim())return;var s=parseSms(t);
-if(!s||!s.amount){bad++;Q.push(t);return}
-if(s.ref&&E.some(function(e){return e.ref===s.ref})){dup++;return}
-E.push({id:Date.now()+"-"+ok+"-"+dup+"-"+bad,date:s.date,sim:s.sim,type:s.type,amount:s.amount,profit:rate(s.type,s.amount),frais:s.frais,ref:s.ref,source:"sms"});ok++;last=s.date});
-save();if(last){day=last;mon=last.slice(0,7)}render();
-$("smsr").textContent=ok+" enregistré(s), "+dup+" déjà présent(s), "+bad+" non reconnu(s).";if(ok||bad)$("sms").value="";if(Q.length)nextManual()};
-var SU="https://ujuiblvtiaknnwjrugki.supabase.co",SK="sb_publishable_ZzBma-mTfltcaHtqQutKyw_s49OB69V",SS="cabine_momo_sess",DK="cabine_momo_del",S=null,DEL=[],Q=[],busy=false,pd=true;
-try{S=JSON.parse(localStorage.getItem(SS)||"null")}catch(e){S=null}
-try{DEL=JSON.parse(localStorage.getItem(DK)||"[]")}catch(e){DEL=[]}
+function logout(){if(E.some(function(x){return !x.synced})&&!confirm("Des opérations ne sont pas encore envoyées. Se déconnecter quand même ?"))return;
+setS(null);$("cfg").hidden=true;uiSync();render()}
+$("c_out").onclick=logout;$("a_out").onclick=logout;$("b_out").onclick=logout;
 function persistDel(){try{localStorage.setItem(DK,JSON.stringify(DEL))}catch(e){}}
-function setS(j){S=j&&j.access_token?{a:j.access_token,r:j.refresh_token,x:Math.floor(Date.now()/1000)+(j.expires_in||3600)}:null;try{if(S)localStorage.setItem(SS,JSON.stringify(S));else localStorage.removeItem(SS)}catch(e){}}
-function auth(q,b){return fetch(SU+"/auth/v1/token?grant_type="+q,{method:"POST",headers:{apikey:SK,"Content-Type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json()})}
+function setS(j){
+if(!(j&&j.access_token)){S=null}
+else{S=fromTok(j.access_token,S||{e:j.user&&j.user.email});S.a=j.access_token;S.r=j.refresh_token;S.x=Math.floor(Date.now()/1000)+(j.expires_in||3600)}
+try{if(S)localStorage.setItem(SS,JSON.stringify(S));else localStorage.removeItem(SS)}catch(e2){}}
+function auth(g,b){return fetch(SU+"/auth/v1/token?grant_type="+g,{method:"POST",headers:{apikey:SK,"Content-Type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json()})}
 async function token(){if(!S)return null;if(S.x-60>Date.now()/1000)return S.a;
 try{var j=await auth("refresh_token",{refresh_token:S.r});if(j.access_token){setS(j);return S.a}if(j.error_code||j.error){setS(null);uiSync()}}catch(e){}return null}
 async function api(path,opt){var t=await token();if(!t)throw new Error("auth");opt=opt||{};opt.headers=Object.assign({apikey:SK,Authorization:"Bearer "+t,"Content-Type":"application/json"},opt.headers||{});return fetch(SU+"/rest/v1/"+path,opt)}
-function uiSync(){var n=E.filter(function(e){return !e.synced}).length;
-$("login").hidden=!!S;
-$("st").textContent=!S?"🔒 Non connecté : données sur ce téléphone seulement":busy?"🔄 Synchronisation…":!navigator.onLine?"📴 Hors ligne"+(n?" · "+n+" en attente":""):n?"⏳ "+n+" en attente d’envoi":"✅ Synchronisé"}
+async function fn(body){var t=await token();if(!t)throw new Error("auth");var r=await fetch(SU+"/functions/v1/gerer-employes",{method:"POST",headers:{apikey:SK,Authorization:"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json()}
+function applyRole(){var r=S?S.role:"",role=!S?"":r==="admin"?"a":r==="owner"?"o":r==="employee"?"e":"x",shop=role==="o"||role==="e",co=coName();
+$("login").hidden=!!S;$("app").hidden=!S;$("gear").hidden=!shop;
+$("admin").hidden=role!=="a";$("bad").hidden=role!=="x";$("shop").hidden=!shop;
+$("own").hidden=role!=="o";$("empc").hidden=role!=="o";$("form").hidden=role!=="e";
+$("logo").hidden=!shop;$("logo").textContent=ini(co);
+$("biz").textContent=role==="a"?"🛠️ Administration":role==="e"?(fullName()||S.e):role==="o"?co:NAME;
+$("co").textContent=role==="e"?co:"";
+if(role!==lastRole){lastRole=role;
+if(role==="e"){$("type").innerHTML=["ret","dep","fnet","fapp","cred"].map(function(t){return '<option value="'+t+'">'+TN[t]+'</option>'}).join("");tchg()}
+if(role==="o"){$("e_pw").value=gen();empList()}
+if(role==="a"){$("a_pw").value=gen();aList()}}}
+function uiSync(){applyRole();var n=E.filter(function(e){return !e.synced}).length,lb=isAdmin()?"Administrateur":isOwner()?"Propriétaire":isEmp()?"Employé":"";
+$("st").textContent=!S?"🔒 Connectez-vous pour utiliser l’application":"👤 "+(S.e||"")+(lb?" · "+lb:"")+(isAdmin()||!lb?"":" · "+(busy?"🔄 Synchronisation…":!navigator.onLine?"📴 Hors ligne"+(n?" · "+n+" en attente":""):n?"⏳ "+n+" en attente d’envoi":"✅ Synchronisé"))}
+async function pullC(){var pr=await api("reglages?select=data"),pj=await pr.json();
+if(Array.isArray(pj)&&pj[0]&&pj[0].data&&pj[0].data.t){C=pj[0].data;try{localStorage.setItem(CK,JSON.stringify(C))}catch(e){}cfgShow();render()}}
 async function sync(){
-if(busy||!S||!navigator.onLine){uiSync();return}
+if(busy||!S||!navigator.onLine||!(isOwner()||isEmp())){uiSync();return}
 busy=true;uiSync();
 try{
 for(var i=0;i<DEL.length;i++){var r0=await api("operations?id=eq."+encodeURIComponent(DEL[i]),{method:"DELETE"});if(r0.ok){DEL.splice(i,1);i--}else if(r0.status===401)throw 0}
 persistDel();
-for(var k=0;k<E.length;k++){var e=E[k];if(e.synced)continue;
-var r=await api("operations",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({id:e.id,date:e.date,sim:e.sim,type:e.type,amount:e.amount,profit:e.profit,frais:e.frais||0,ref:e.ref||null,source:e.source||"sms"})});
+for(var j=0;j<E.length;j++){var e=E[j];if(e.synced)continue;
+var r=await api("operations",{method:"POST",headers:{Prefer:"resolution=ignore-duplicates,return=minimal"},body:JSON.stringify({id:e.id,date:e.date,at:e.at||null,sim:e.sim,type:e.type,amount:e.amount,profit:e.profit,frais:e.frais||0,source:e.source||"manuel",by_name:e.bn||null})});
 if(r.ok||r.status===409)e.synced=true;else throw 0}
 persist();
-if(!C.name){var pr=await api("parametres?id=eq.1&select=data");var pj=await pr.json();
-if(pj[0]&&pj[0].data&&pj[0].data.name){C=pj[0].data;try{localStorage.setItem(CK,JSON.stringify(C))}catch(e2){}cfgShow()}}
-else if(pd){var rp=await api("parametres",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({id:1,data:C})});if(rp.ok)pd=false}
+if(isOwner()){if(!C.t){await pullC()}
+else if(pd){var rp=await api("reglages",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({owner_id:S.u,data:C})});if(rp.ok)pd=false}}
+else await pullC();
 var g=await api("operations?select=*&order=date.desc&limit=1000");var rows=await g.json();
 if(Array.isArray(rows)){var ids={},add=0;E.forEach(function(x){ids[x.id]=1});
-rows.forEach(function(x){if(!ids[x.id]&&DEL.indexOf(x.id)<0){add++;E.push({id:x.id,date:x.date,sim:x.sim,type:x.type,amount:Number(x.amount),profit:Number(x.profit),frais:Number(x.frais)||0,ref:x.ref||"",source:x.source,synced:true})}});
+rows.forEach(function(x){if(!ids[x.id]&&DEL.indexOf(x.id)<0){add++;E.push({id:x.id,date:x.date,at:x.at||"",sim:x.sim,type:x.type,amount:Number(x.amount),profit:Number(x.profit),frais:Number(x.frais)||0,source:x.source,by:x.by_email||"",bn:x.by_name||"",synced:true})}});
 if(add)persist()}
 }catch(err){}
 busy=false;uiSync();render()}
 $("l_go").onclick=async function(){$("l_msg").textContent="Connexion…";
 try{var j=await auth("password",{email:$("l_em").value.trim(),password:$("l_pw").value});
-if(j.access_token){setS(j);$("l_pw").value="";$("l_msg").textContent="";uiSync();sync()}else $("l_msg").textContent="E-mail ou mot de passe incorrect."}
+if(j.access_token){var em=String((j.user&&j.user.email)||$("l_em").value.trim()).toLowerCase(),last="";
+try{last=localStorage.getItem(LK)||""}catch(e){}
+if(last&&last!==em){if(E.some(function(x){return !x.synced})&&!confirm("Des opérations de "+last+" ne sont pas encore envoyées et seront perdues. Continuer ?")){$("l_msg").textContent="Connexion annulée.";return}
+E=[];DEL=[];C={};persist();persistDel();try{localStorage.removeItem(CK)}catch(e){}}
+try{localStorage.setItem(LK,em)}catch(e){}
+setS(j);lastRole="?";$("l_pw").value="";$("l_msg").textContent="";pd=true;cfgShow();uiSync();sync();render()}
+else $("l_msg").textContent="E-mail ou mot de passe incorrect."}
 catch(e){$("l_msg").textContent="Pas de connexion internet."}};
-function nextManual(){if(!Q.length)return;var t=Q.shift();$("d_raw").textContent=t.trim().slice(0,200);$("d_date").value=td();$("d_amt").value="";$("d_frais").value="";$("d_pro").value="";$("dlg").showModal()}
-$("d_ok").onclick=function(){var a=parseFloat($("d_amt").value);if(!(a>=0)||$("d_amt").value==="")return;var ty=$("d_type").value;
-E.push({id:Date.now()+"-m",date:$("d_date").value||td(),sim:$("d_sim").value,type:ty,amount:a,profit:$("d_pro").value===""?rate(ty,a):(parseFloat($("d_pro").value)||0),frais:parseFloat($("d_frais").value)||0,ref:"",source:"manuel"});
-save();$("dlg").close();render();nextManual()};
-$("d_no").onclick=function(){$("dlg").close();nextManual()};
+var NOFN="Pas de connexion, ou fonction « gerer-employes » non installée.";
+function showCred(id,em,pw){$(id).innerHTML='<div class="cr">Compte créé.<br>E-mail : <b>'+esc(em)+'</b><br>Mot de passe : <b>'+esc(pw)+'</b><br><small>Note-les : le mot de passe ne sera plus affiché.</small><button data-cp="'+esc("E-mail : "+em+" / Mot de passe : "+pw)+'">Copier</button></div>'}
+document.addEventListener("click",function(ev){var t=ev.target.getAttribute&&ev.target.getAttribute("data-cp");
+if(t){try{navigator.clipboard.writeText(t).then(function(){ev.target.textContent="Copié"},function(){prompt("Copie ce texte",t)})}catch(e){prompt("Copie ce texte",t)}}});
+function sugE(){var p=slug($("e_pn").value),n=slug($("e_nm").value);return(p&&n)?p+"."+n+"@"+DOM:""}
+$("e_pn").oninput=$("e_nm").oninput=function(){$("e_em").placeholder=sugE()||"généré automatiquement"};
+$("e_gen").onclick=function(){$("e_pw").value=gen()};
+async function empList(){$("emps").textContent="Chargement…";
+try{var j=await fn({action:"list"});
+if(!j.users){$("emps").textContent=j.error||"Erreur";return}
+var h="";j.users.forEach(function(u){h+='<div class="it"><div><b>'+esc(((u.prenom||"")+" "+(u.nom||"")).trim()||u.email)+'</b><small>'+esc(u.email)+'</small></div><button class="x" data-uid="'+esc(u.id)+'">Retirer</button></div>'});
+$("emps").innerHTML=h||'<div class="em">Aucun employé.</div>'}
+catch(e){$("emps").textContent=NOFN}}
+$("e_go").onclick=async function(){var pn=$("e_pn").value.trim(),nm=$("e_nm").value.trim(),em=$("e_em").value.trim()||sugE(),pw=$("e_pw").value;
+if(!pn||!nm){$("e_msg").textContent="Prénom et nom requis.";return}
+if(pw.length<6){$("e_msg").textContent="Mot de passe : 6 caractères minimum.";return}
+$("e_msg").textContent="Création…";
+try{var j=await fn({action:"create",prenom:pn,nom:nm,email:em,password:pw});
+if(j.ok){showCred("e_msg",em,pw);$("e_pn").value="";$("e_nm").value="";$("e_em").value="";$("e_em").placeholder="généré automatiquement";$("e_pw").value=gen();empList()}
+else $("e_msg").textContent=j.error||"Erreur"}
+catch(e){$("e_msg").textContent=NOFN}};
+$("emps").onclick=async function(ev){var id=ev.target.getAttribute("data-uid");
+if(id&&confirm("Retirer cet employé ? Il ne pourra plus se connecter.")){
+try{await fn({action:"remove",id:id})}catch(e){}empList()}};
+function sugA(){var s=slug($("a_name").value);return s?s+"@"+DOM:""}
+$("a_name").oninput=function(){$("a_em").placeholder=sugA()||"généré automatiquement"};
+$("a_gen").onclick=function(){$("a_pw").value=gen()};
+async function aList(){$("owners").textContent="Chargement…";
+try{var j=await fn({action:"owners"});
+if(!j.users){$("owners").textContent=j.error||"Erreur";return}
+var h="";j.users.forEach(function(u){h+='<div class="it"><div><b>'+esc(u.name||"(sans nom)")+'</b><small>'+esc(u.email)+'</small></div><div style="display:flex;flex:none"><button class="x n" data-oid="'+esc(u.id)+'" data-act="ren" data-name="'+esc(u.name||"")+'">Renommer</button><button class="x" data-oid="'+esc(u.id)+'" data-act="del">Retirer</button></div></div>'});
+$("owners").innerHTML=h||'<div class="em">Aucun propriétaire.</div>'}
+catch(e){$("owners").textContent=NOFN}}
+$("a_go").onclick=async function(){var nm=$("a_name").value.trim(),em=$("a_em").value.trim()||sugA(),pw=$("a_pw").value;
+if(!nm){$("a_msg").textContent="Nom de l’entreprise requis.";return}
+if(pw.length<6){$("a_msg").textContent="Mot de passe : 6 caractères minimum.";return}
+$("a_msg").textContent="Création…";
+try{var j=await fn({action:"create_owner",name:nm,email:em,password:pw});
+if(j.ok){showCred("a_msg",em,pw);$("a_name").value="";$("a_em").value="";$("a_em").placeholder="généré automatiquement";$("a_pw").value=gen();aList()}
+else $("a_msg").textContent=j.error||"Erreur"}
+catch(e){$("a_msg").textContent=NOFN}};
+$("owners").onclick=async function(ev){var t=ev.target,id=t.getAttribute("data-oid"),ac=t.getAttribute("data-act");if(!id)return;
+if(ac==="ren"){var nn=prompt("Nouveau nom de l’entreprise",t.getAttribute("data-name")||"");
+if(nn&&nn.trim()){try{var j=await fn({action:"rename_owner",id:id,name:nn.trim()});if(j.error)alert(j.error)}catch(e){}aList()}}
+else if(ac==="del"&&confirm("Retirer ce propriétaire et tous ses employés ? Ils ne pourront plus se connecter.")){
+try{await fn({action:"remove_owner",id:id})}catch(e){}aList()}};
 window.addEventListener("online",sync);window.addEventListener("offline",uiSync);setInterval(sync,60000);
-uiSync();sync();
-render();
+cfgShow();uiSync();sync();render();
 </script>
 </body>
 </html>
