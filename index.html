@@ -277,8 +277,9 @@ try{var j=await auth("refresh_token",{refresh_token:S.r});if(j.access_token){set
 async function api(path,opt){var t=await token();if(!t)throw new Error("auth");opt=opt||{};opt.headers=Object.assign({apikey:SK,Authorization:"Bearer "+t,"Content-Type":"application/json"},opt.headers||{});return fetch(SU+"/rest/v1/"+path,opt)}
 async function fn(body){var t=await token();if(!t)throw new Error("auth");
 var ac=new AbortController(),tm=setTimeout(function(){ac.abort()},20000);
-try{var r=null,FN=["dynamic-handler","gerer-employes"];
-for(var fi=0;fi<FN.length;fi++){r=await fetch(SU+"/functions/v1/"+FN[fi],{method:"POST",signal:ac.signal,headers:{apikey:SK,Authorization:"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify(body)});if(r.status!==404)break}
+try{var r=null,le=null,FN=["gerer-employes","dynamic-handler"];
+for(var fi=0;fi<FN.length;fi++){try{r=await fetch(SU+"/functions/v1/"+FN[fi],{method:"POST",signal:ac.signal,headers:{apikey:SK,Authorization:"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify(body)});le=null;if(r.status!==404)break}catch(e){le=e;r=null}}
+if(!r)throw le||new Error("réseau");
 var j={};try{j=await r.json()}catch(e){j={}}
 if(!r.ok&&!j.error)j.error=r.status===401?"Session expirée : reconnectez-vous.":r.status===404?NOFN:(j.message||j.msg||"Erreur "+r.status);
 return j}finally{clearTimeout(tm)}}
@@ -330,6 +331,7 @@ catch(e){$("l_msg").textContent="Pas de connexion internet."}
 finally{logging=false;$("l_go").disabled=false}};
 $("l_em").onkeydown=$("l_pw").onkeydown=function(ev){if(ev.key==="Enter")$("l_go").click()};
 var NOFN="Pas de connexion, ou fonction « gerer-employes » non installée.";
+function nof(e){return NOFN+(e&&e.message?" ["+e.message+"]":"")}
 function showCred(id,em,pw){$(id).innerHTML='<div class="cr">Compte créé.<br>E-mail : <b>'+esc(em)+'</b><br>Mot de passe : <b>'+esc(pw)+'</b><br><small>Note-les : le mot de passe ne sera plus affiché.</small><button data-cp="'+esc("E-mail : "+em+" / Mot de passe : "+pw)+'">Copier</button></div>'}
 document.addEventListener("click",function(ev){var t=ev.target.getAttribute&&ev.target.getAttribute("data-cp");
 if(t){try{navigator.clipboard.writeText(t).then(function(){ev.target.textContent="Copié"},function(){prompt("Copie ce texte",t)})}catch(e){prompt("Copie ce texte",t)}}});
@@ -341,7 +343,7 @@ try{var j=await fn({action:"list"});
 if(!j.users){$("emps").textContent=j.error||"Erreur";return}
 var h="";j.users.forEach(function(u){h+='<div class="it"><div><b>'+esc(((u.prenom||"")+" "+(u.nom||"")).trim()||u.email)+'</b><small>'+esc(u.email)+'</small></div><button class="x" data-uid="'+esc(u.id)+'">Retirer</button></div>'});
 $("emps").innerHTML=h||'<div class="em">Aucun employé.</div>'}
-catch(e){$("emps").textContent=NOFN}}
+catch(e){$("emps").textContent=nof(e)}}
 $("e_go").onclick=async function(){var pn=$("e_pn").value.trim(),nm=$("e_nm").value.trim(),em=$("e_em").value.trim()||sugE(),pw=$("e_pw").value;
 if(!pn||!nm){$("e_msg").textContent="Prénom et nom requis.";return}
 if(pw.length<6){$("e_msg").textContent="Mot de passe : 6 caractères minimum.";return}
@@ -349,10 +351,10 @@ $("e_msg").textContent="Création…";
 try{var j=await fn({action:"create",prenom:pn,nom:nm,email:em,password:pw});
 if(j.ok){showCred("e_msg",em,pw);$("e_pn").value="";$("e_nm").value="";$("e_em").value="";$("e_em").placeholder="généré automatiquement";$("e_pw").value=gen();empList()}
 else $("e_msg").textContent=j.error||"Erreur"}
-catch(e){$("e_msg").textContent=NOFN}};
+catch(e){$("e_msg").textContent=nof(e)}};
 $("emps").onclick=async function(ev){var id=ev.target.getAttribute("data-uid");
 if(id&&confirm("Retirer cet employé ? Il ne pourra plus se connecter.")){
-try{var rj=await fn({action:"remove",id:id});if(rj.error)alert(rj.error)}catch(e){alert(NOFN)}empList()}};
+try{var rj=await fn({action:"remove",id:id});if(rj.error)alert(rj.error)}catch(e){alert(nof(e))}empList()}};
 function sugA(){var s=slug($("a_name").value);return s?s+"@"+DOM:""}
 $("a_name").oninput=function(){$("a_em").placeholder=sugA()||"généré automatiquement"};
 $("a_gen").onclick=function(){$("a_pw").value=gen()};
@@ -361,7 +363,7 @@ try{var j=await fn({action:"owners"});
 if(!j.users){$("owners").textContent=j.error||"Erreur";return}
 var h="";j.users.forEach(function(u){h+='<div class="it"><div><b>'+esc(u.name||"(sans nom)")+'</b><small>'+esc(u.email)+'</small></div><div style="display:flex;flex:none"><button class="x n" data-oid="'+esc(u.id)+'" data-act="ren" data-name="'+esc(u.name||"")+'">Renommer</button><button class="x" data-oid="'+esc(u.id)+'" data-act="del">Retirer</button></div></div>'});
 $("owners").innerHTML=h||'<div class="em">Aucun propriétaire.</div>'}
-catch(e){$("owners").textContent=NOFN}}
+catch(e){$("owners").textContent=nof(e)}}
 $("a_go").onclick=async function(){var nm=$("a_name").value.trim(),em=$("a_em").value.trim()||sugA(),pw=$("a_pw").value;
 if(!nm){$("a_msg").textContent="Nom de l’entreprise requis.";return}
 if(pw.length<6){$("a_msg").textContent="Mot de passe : 6 caractères minimum.";return}
@@ -369,12 +371,12 @@ $("a_msg").textContent="Création…";
 try{var j=await fn({action:"create_owner",name:nm,email:em,password:pw});
 if(j.ok){showCred("a_msg",em,pw);$("a_name").value="";$("a_em").value="";$("a_em").placeholder="généré automatiquement";$("a_pw").value=gen();aList()}
 else $("a_msg").textContent=j.error||"Erreur"}
-catch(e){$("a_msg").textContent=NOFN}};
+catch(e){$("a_msg").textContent=nof(e)}};
 $("owners").onclick=async function(ev){var t=ev.target,id=t.getAttribute("data-oid"),ac=t.getAttribute("data-act");if(!id)return;
 if(ac==="ren"){var nn=prompt("Nouveau nom de l’entreprise",t.getAttribute("data-name")||"");
-if(nn&&nn.trim()){try{var j=await fn({action:"rename_owner",id:id,name:nn.trim()});if(j.error)alert(j.error)}catch(e){alert(NOFN)}aList()}}
+if(nn&&nn.trim()){try{var j=await fn({action:"rename_owner",id:id,name:nn.trim()});if(j.error)alert(j.error)}catch(e){alert(nof(e))}aList()}}
 else if(ac==="del"&&confirm("Retirer ce propriétaire et tous ses employés ? Ils ne pourront plus se connecter.")){
-try{var rk=await fn({action:"remove_owner",id:id});if(rk.error)alert(rk.error)}catch(e){alert(NOFN)}aList()}};
+try{var rk=await fn({action:"remove_owner",id:id});if(rk.error)alert(rk.error)}catch(e){alert(nof(e))}aList()}};
 
 function nn(v){var x=parseFloat(v);return(isNaN(x)||x<0)?"":String(v).trim()}
 /* ---- Fond d’écran (propre à chaque téléphone, pour tous les types de compte) ---- */
