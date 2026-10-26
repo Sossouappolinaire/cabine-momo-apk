@@ -1,0 +1,26 @@
+CABINE MOMO - projet Android complet en Java
+============================================
+
+Tous les fichiers sont a la racine du depot. Seul le dossier .github existe en plus
+(il contient la recette de compilation).
+
+Fichiers
+- index.html            : l'application (affichee dans une WebView)
+- MainActivity.java     : ecran unique, charge index.html
+- CabineBridge.java     : pont entre la page et Android
+- CabineSmsPlugin.java, CabineSmsReceiver.java, CabineSmsStore.java : lecture automatique des SMS MoMo
+- CabineFilesPlugin.java: export Excel dans Documents/CabineMomo et partage
+- CabineSecurityPlugin.java : code PIN a 6 chiffres et empreinte digitale
+- AndroidManifest.xml, build.gradle, settings.gradle, gradle.properties : configuration Android
+- icon.png              : icone de l'application
+- parser.js, test_parser.js : lecture des SMS (reglages dans index.html, bloc SMS_RULES)
+- .github/workflows/build.yml : compilation automatique sur github.com
+
+Compiler sur github.com
+1. Creez un depot, puis envoyez-y tous ces fichiers (le dossier .github compris).
+2. Onglet "Actions" > "Compiler l'APK" > "Run workflow" (ou faites simplement un commit).
+3. Quand la ligne devient verte, ouvrez-la : l'APK est dans "Artifacts" > CabineMomo-APK.
+
+Bouton rouge "Deconnecter tous les comptes"
+Petit bouton rouge tout en bas de l'ecran, visible seulement si un compte ou une SIM est connecte.
+Il deconnecte la session de l'application et toutes les SIM de la lecture des SMS.

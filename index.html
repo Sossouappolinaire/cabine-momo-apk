@@ -4,6 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cabine Momo</title>
+<script>
+/* Pont Android : la page parle au code Java (MainActivity) par window.CabineNative */
+(function(){
+  if(!window.CabineNative||window.Capacitor)return;
+  var cbs={},ls={},n=0;
+  function call(p,m,a){return new Promise(function(res,rej){
+    var id=++n;cbs[id]=[res,rej];
+    try{CabineNative.call(id,p,m,JSON.stringify(a||{}))}catch(e){delete cbs[id];rej(e)}})}
+  window.__cabineCb=function(id,ok,v){var c=cbs[id];if(!c)return;delete cbs[id];if(ok)c[0](v);else c[1]({message:String(v)})};
+  window.__cabineEmit=function(p,ev,d){(ls[p+":"+ev]||[]).forEach(function(f){try{f(d)}catch(e){}})};
+  function plug(name,methods){var o={};
+    methods.forEach(function(m){o[m]=function(a){return call(name,m,a)}});
+    o.addListener=function(ev,f){(ls[name+":"+ev]=ls[name+":"+ev]||[]).push(f);return Promise.resolve({remove:function(){}})};
+    return o}
+  window.Capacitor={isNativePlatform:function(){return true},Plugins:{
+    CabineSms:plug("CabineSms",["getPending","ack","sendCode","checkPermissions","requestPermissions"]),
+    Filesystem:plug("Filesystem",["writeFile"]),
+    Share:plug("Share",["share"]),
+    CabineSecurity:plug("CabineSecurity",["getState","setPin","verifyPin","disablePin","clearPin","setBiometricEnabled","authenticateBiometric"])
+  }};
+})();
+</script>
 <meta name="theme-color" content="#06402b">
 <meta name="color-scheme" content="light dark">
 <script>try{if(localStorage.getItem("cabine_momo_pin_lock")==="1")document.documentElement.classList.add("lock-checking")}catch(e){}</script>
@@ -364,6 +386,12 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
     <h2>Réglages de la cabine</h2>
     <div class="row"><div><label>Numéro MTN</label><input id="c_mtn" type="tel" inputmode="tel"></div><div><label>Numéro Moov</label><input id="c_moov" type="tel" inputmode="tel"></div></div>
     <div class="row"><div><label>Numéro Celtis</label><input id="c_cel" type="tel" inputmode="tel"></div></div>
+    <div id="sms_box">
+      <h2>Lecture automatique des SMS</h2>
+      <div class="hint" id="sms_state"></div>
+      <div id="sms_sims"></div>
+      <div class="hint" id="sms_msg"></div>
+    </div>
     <div class="row"><div><label>Dépôt : F pour 1000 F</label><input id="c_qd" type="number" step="0.01" min="0" placeholder="3"></div><div><label>Retrait : % des frais</label><input id="c_qr" type="number" step="0.01" min="0" placeholder="47"></div><div><label>Crédit/forfait : F pour 100 F</label><input id="c_qc" type="number" step="0.01" min="0" placeholder="4"></div></div>
     <button class="p" id="c_save">Enregistrer les paramètres</button>
     <div class="sep"></div>
@@ -452,6 +480,9 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
 <div id="v2" hidden></div>
 <p class="foot">Les données sont enregistrées sur ce téléphone, puis envoyées en ligne dès que la connexion revient.</p>
 </div>
+</div>
+<div id="allout_w" hidden style="text-align:center;margin:14px 0 0;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))">
+  <button id="allout" type="button" style="width:auto;display:inline-block;padding:6px 14px;font-size:12px;font-weight:600;background:#c62828;color:#fff;border:0;border-radius:999px;opacity:.88">Déconnecter tous les comptes</button>
 </div>
 </main>
 <div id="app-lock" class="app-lock" role="dialog" aria-modal="true" aria-labelledby="lock-title" hidden>
@@ -1087,7 +1118,118 @@ fresh.forEach(function(o){E.push(o)});save();render();
 bkMsg("✅ "+fresh.length+" opération(s) importée(s)"+(dup?", "+dup+" déjà présente(s)":"")+"."+bad)}
 catch(e){bkMsg(e&&e.message==="zip"?"Fichier illisible : ce n’est pas un fichier Excel (.xlsx).":"Fichier illisible ("+(e&&e.message||e)+").")}};
 
-wpInit();thInit();cfgShow();bkShow();uiSync();sync();render();bkCheck();secInit();
+/* ===== Lecture automatique des SMS MoMo ===== */
+/* Réglage : quel type d'opération pour quel début de SMS. Modifiable ici. */
+var SMS_RULES=[
+  {re:/^\s*transfert\b/i,type:"dep"},
+  {re:/^\s*d[ée]p[ôo]t\s+re[çc]u/i,type:"ret"},
+  {re:/^\s*retrait\b/i,type:"ret"}
+];
+function smsNum(s){var n=parseInt(String(s||"").replace(/[^\d]/g,""),10);return isNaN(n)?null:n}
+function smsSim(sender,body){var t=(sender||"")+" "+(body||"");
+  if(/celtis/i.test(t))return"Celtis";if(/moov/i.test(t))return"Moov";if(/mtn|momo/i.test(t))return"MTN";return""}
+function smsParse(body,sender){
+  var b=String(body||"").replace(/\s+/g," ").trim();if(!b)return null;
+  var type="";
+  for(var i=0;i<SMS_RULES.length;i++){if(SMS_RULES[i].re.test(b)){type=SMS_RULES[i].type;break}}
+  if(!type){
+    if(/forfait|pass\b|bundle/i.test(b)&&/internet|data|\bgo\b|\bmo\b/i.test(b))type="fnet";
+    else if(/forfait/i.test(b)&&/appel|voix|minute/i.test(b))type="fapp";
+    else if(/cr[ée]dit|recharge|airtime/i.test(b))type="cred";
+  }
+  var am=b.match(/(\d[\d\s.]*)\s*F(?:CFA)?\b/i),amount=am?smsNum(am[1]):null;
+  var fm=b.match(/frais\s*:?\s*(\d[\d\s.]*)\s*F/i),frais=fm?smsNum(fm[1]):0;
+  var im=b.match(/\bID\s*:?\s*(\d{6,})/i),txid=im?im[1]:"";
+  var dm=b.match(/(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})/),date="",at="";
+  if(dm){date=dm[1];var d=new Date(dm[1]+"T"+dm[2]);at=isNaN(d)?"":d.toISOString()}
+  return{type:type,amount:amount,frais:frais||0,txid:txid,date:date,at:at,sim:smsSim(sender,b),raw:b};
+}
+
+/* ---- SMS : file d'attente, enregistrement automatique, saisie manuelle de secours ---- */
+var SMS_SOURCE="sms",SMSP=null,smsBusy=false,SL_KEY="cabine_momo_simlink",SL={};
+try{SL=JSON.parse(localStorage.getItem(SL_KEY)||"{}")}catch(e){SL={}}
+function smsSaveSL(){try{localStorage.setItem(SL_KEY,JSON.stringify(SL))}catch(e){}}
+function smsActive(){return SIMS.some(function(s){return SL[s]===true})}
+function smsHash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return String(Math.abs(h))}
+function smsMakeOp(p,sim,type,amount,frais){
+  return{id:"sms-"+(p.txid||smsHash(p.raw)),date:p.date||td(),at:p.at||new Date().toISOString(),sim:sim,type:type,amount:amount,
+    profit:rate(type,amount,frais),frais:type==="ret"?frais:0,source:SMS_SOURCE,by:S&&S.e,bn:"SMS auto"}}
+function smsAdd(op){
+  if(E.some(function(x){return x.id===op.id})||DEL.indexOf(op.id)>=0)return false;
+  E.push(op);day=op.date;mon=op.date.slice(0,7);save();render();return true}
+function smsAsk(p){return new Promise(function(res){
+  var w=document.createElement("div");
+  w.style.cssText="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px";
+  var types=["ret","dep","fnet","fapp","cred"];
+  w.innerHTML='<div class="card" style="max-width:420px;width:100%;max-height:90vh;overflow:auto"><h2>SMS à enregistrer</h2>'+
+  '<div class="hint" style="margin:0 0 10px">Lecture automatique impossible. Vérifiez puis enregistrez.</div>'+
+  '<div class="hint" style="margin:0 0 10px;word-break:break-word">'+esc(p.raw.slice(0,220))+'</div>'+
+  '<div class="row"><div><label>SIM</label><select id="sm_sim">'+SIMS.map(function(s){return'<option'+(s===p.sim?" selected":"")+'>'+s+'</option>'}).join("")+'</select></div>'+
+  '<div><label>Opération</label><select id="sm_ty">'+types.map(function(t){return'<option value="'+t+'"'+(t===p.type?" selected":"")+'>'+TN[t]+'</option>'}).join("")+'</select></div></div>'+
+  '<div class="row"><div><label>Montant (F)</label><input id="sm_am" type="number" inputmode="numeric" min="0" value="'+(p.amount==null?"":p.amount)+'"></div>'+
+  '<div id="sm_frw"><label>Frais de retrait (F)</label><input id="sm_fr" type="number" inputmode="numeric" min="0" value="'+(p.frais||0)+'"></div></div>'+
+  '<div class="row"><button class="p" id="sm_ok">Enregistrer</button><button id="sm_no">Ignorer</button></div></div>';
+  document.body.appendChild(w);
+  var g=function(i){return w.querySelector("#"+i)};
+  function fw(){g("sm_frw").hidden=g("sm_ty").value!=="ret"}fw();g("sm_ty").onchange=fw;
+  g("sm_ok").onclick=function(){var a=parseFloat(g("sm_am").value),ty=g("sm_ty").value,fr=parseFloat(g("sm_fr").value)||0;
+    if(!(a>=0)||g("sm_am").value===""){g("sm_am").focus();return}
+    smsAdd(smsMakeOp(p,g("sm_sim").value,ty,a,fr));w.remove();res(true)};
+  g("sm_no").onclick=function(){w.remove();res(false)}})}
+async function smsHandle(it){
+  var body=String(it.body||"");
+  if(SL.pend&&body.indexOf(SL.pend.code)>=0){SL[SL.pend.sim]=true;delete SL.pend;smsSaveSL();smsRender("✅ SIM connectée.");return}
+  var p=smsParse(body,it.sender);if(!p)return;
+  if(p.type&&p.amount!=null&&p.sim){smsAdd(smsMakeOp(p,p.sim,p.type,p.amount,p.frais));return}
+  if(p.amount!=null||/solde|\bID\s*:/i.test(p.raw))await smsAsk(p)}
+async function smsPull(){
+  if(smsBusy||!SMSP||!S||!(isOwner()||isEmp())||secLocked)return;
+  smsBusy=true;
+  try{var r=await SMSP.getPending(),its=(r&&r.items)||[],ids=[];
+    for(var i=0;i<its.length;i++){
+      if(!smsActive()&&!(SL.pend&&String(its[i].body).indexOf(SL.pend.code)>=0))continue;
+      try{await smsHandle(its[i])}catch(e){}
+      ids.push(its[i].id)}
+    if(ids.length)await SMSP.ack({ids:ids})
+  }catch(e){}
+  smsBusy=false}
+function smsInit(){SMSP=capP("CabineSms");if(!SMSP){smsRender();return}
+  try{SMSP.addListener("smsReceived",function(){smsPull()})}catch(e){}
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)smsPull()});
+  setInterval(smsPull,10000);smsPull();smsRender()}
+function smsRender(msg){
+  var box=$("sms_sims");if(!box)return;
+  if(!SMSP){box.innerHTML="";$("sms_msg").textContent="Lecture automatique disponible dans l’application Android mise à jour.";return}
+  $("sms_state").textContent=smsActive()?"✅ Lecture automatique active.":"Connectez au moins une SIM pour activer la lecture automatique.";
+  box.innerHTML=SIMS.map(function(s){var n=C[s]||"",ok=SL[s]===true;
+    return'<div class="it"><div><b>'+s+'</b><small>'+(n?esc(n):"Numéro non renseigné")+'</small></div>'+
+    (ok?'<button data-sl="off" data-sim="'+s+'">✅ Déconnecter</button>':'<button class="p" data-sl="on" data-sim="'+s+'"'+(n?"":" disabled")+'>Connecter</button>')+'</div>'}).join("")+
+    (SL.pend?'<div class="row" style="margin-top:8px"><div><label>Code reçu par SMS ('+SL.pend.sim+')</label><input id="sl_code" type="number" inputmode="numeric" placeholder="6 chiffres"></div><div style="flex:0 0 auto;align-self:flex-end"><button class="p" id="sl_ok">Valider</button></div></div>':"");
+  if(msg)$("sms_msg").textContent=msg}
+$("sms_sims").onclick=async function(ev){
+  var t=ev.target,m=t.getAttribute("data-sl"),sim=t.getAttribute("data-sim");
+  if(t.id==="sl_ok"){var v=($("sl_code").value||"").trim();
+    if(SL.pend&&v===SL.pend.code){SL[SL.pend.sim]=true;delete SL.pend;smsSaveSL();smsRender("✅ SIM connectée.");smsPull()}
+    else $("sms_msg").textContent="Code incorrect.";return}
+  if(m==="off"){delete SL[sim];smsSaveSL();smsRender("SIM déconnectée.");return}
+  if(m!=="on"||!SMSP)return;
+  var num=(C[sim]||"").trim();if(!num){$("sms_msg").textContent="Enregistrez d’abord le numéro de la SIM.";return}
+  try{var pr=await SMSP.requestPermissions();
+    if(pr&&pr.sms&&pr.sms!=="granted"){$("sms_msg").textContent="Autorisation SMS refusée.";return}
+    var code=String(100000+Math.floor(Math.random()*900000));
+    await SMSP.sendCode({to:num,code:code});
+    SL.pend={sim:sim,code:code};smsSaveSL();smsRender("Code envoyé au "+num+". Il se validera tout seul à sa réception.")}
+  catch(e){$("sms_msg").textContent="Échec : "+((e&&e.message)||"envoi impossible")}};
+var smsCfgShow=cfgShow;cfgShow=function(){smsCfgShow();smsRender()};
+/* ---- Bouton « Déconnecter tous les comptes » ---- */
+function allOutShow(){var w=$("allout_w");if(w)w.hidden=!(S||smsActive()||SL.pend)}
+$("allout").onclick=async function(){
+  if(!confirm("Déconnecter tous les comptes de ce téléphone ?\n\n• la session de l’application\n• toutes les SIM connectées pour la lecture des SMS"))return;
+  if(S){await logout();if(S)return}
+  SL={};smsSaveSL();smsRender("Toutes les SIM sont déconnectées.");allOutShow()};
+var uiSyncBase=uiSync;uiSync=function(){uiSyncBase.apply(this,arguments);allOutShow()};
+
+wpInit();thInit();cfgShow();bkShow();uiSync();sync();render();bkCheck();secInit();smsInit();
 </script>
 </body>
 </html>
