@@ -1,0 +1,57 @@
+name: Compiler l'APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le projet
+        uses: actions/checkout@v4
+
+      - name: Installer Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Installer le SDK Android
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-34 build-tools;34.0.0'
+
+      - name: Installer Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      # Les fichiers du projet sont tous à la racine du dépôt.
+      # Cette étape les range dans l'arborescence que demande Android.
+      - name: Ranger les fichiers pour Android
+        run: |
+          set -e
+          mkdir -p _android/src/main/java/com/cabine/momo
+          mkdir -p _android/src/main/assets
+          mkdir -p _android/src/main/res/mipmap-xxxhdpi
+          cp settings.gradle build.gradle gradle.properties _android/
+          cp AndroidManifest.xml _android/src/main/
+          cp ./*.java _android/src/main/java/com/cabine/momo/
+          cp index.html _android/src/main/assets/
+          cp icon.png _android/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
+      - name: Compiler l'APK
+        working-directory: _android
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Mettre l'APK à disposition
+        uses: actions/upload-artifact@v4
+        with:
+          name: CabineMomo-APK
+          path: _android/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
