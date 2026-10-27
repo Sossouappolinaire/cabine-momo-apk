@@ -503,6 +503,7 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
     <div><label>Montant (F)</label><input id="amt" type="number" inputmode="numeric" min="0" placeholder="0"></div>
     <div id="fr_w" hidden><label>Frais de retrait (F)</label><input id="fr" type="number" inputmode="numeric" min="0" placeholder="0"></div>
   </div>
+  <div class="row"><div><label>Réf. / ID de la transaction (facultatif)</label><input id="ref" type="text" autocomplete="off" maxlength="40" placeholder="ex. 13203308682"></div></div>
   <button class="p" id="add">Enregistrer</button>
 </div>
 
@@ -553,6 +554,8 @@ function f(n){return Number(n).toLocaleString("fr-FR")+" F"}
 function hh(e){if(!e.at)return"";var d=new Date(e.at);return isNaN(d)?"":d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
 function dd(e){return e.date.slice(8)+"/"+e.date.slice(5,7)+"/"+e.date.slice(0,4)}
 function ord(a,b){return (b.date+(b.at||"")).localeCompare(a.date+(a.at||""))}
+function opRef(e){if(e&&e.ref)return String(e.ref);var m=/^sms-(.{6,})$/.exec(String(e&&e.id||""));return m&&/\d/.test(m[1])?m[1]:""}
+function localDay(ts){var d=new Date(ts);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function coName(){return (S&&S.co)||NAME}
 function fullName(){return S?((S.pn||"")+" "+(S.nm||"")).trim():""}
 function ini(n){var w=String(n||"").trim().split(/\s+/).filter(Boolean);if(!w.length)return"?";var a=w[0].charAt(0),b=w.length>1?w[w.length-1].charAt(0):(w[0].charAt(1)||"");return(a+b).toUpperCase()}
@@ -581,8 +584,9 @@ function itemHtml(e,full){var o=isOwner(),w=[f(e.amount)];
 if(o)w.push("bénéfice "+f(e.profit));
 if(e.frais)w.push("frais "+f(e.frais));
 if(o&&(e.bn||e.by))w.push("par "+esc(e.bn||e.by));
+if(opRef(e))w.push("Réf "+esc(opRef(e)));
 var t=(full?dd(e)+" ":"")+(hh(e)?(full?"à ":"")+hh(e)+" · ":"");
-return '<div class="it"><div><b>'+t+esc(e.sim)+' · '+esc(TN[e.type]||e.type)+'</b><small>'+w.join(" · ")+'</small></div>'+((!full&&(o||!e.synced))?'<button class="x" data-id="'+esc(e.id)+'">Suppr.</button>':'')+'</div>'}
+return '<div class="it"><div><b>'+t+esc(e.sim)+' · '+esc(TN[e.type]||e.type)+'</b><small>'+w.join(" · ")+'</small></div>'+(!full?'<button class="x" data-id="'+esc(e.id)+'">Suppr.</button>':'')+'</div>'}
 function render(){var o=isOwner();
 var dl=E.filter(function(e){return e.date===day}).sort(ord);
 var h='<div class="card"><label>Date</label><input type="date" id="dp" value="'+day+'"></div>'+cards(agg(dl))+simTable(dl)+classCard(dl);
@@ -614,11 +618,12 @@ $("add").onclick=function(){
 var ty=$("type").value,a=parseFloat($("amt").value),fr=parseFloat($("fr").value)||0;
 if(!(a>=0)||$("amt").value===""){$("amt").focus();return}
 if(ty==="ret"&&$("fr").value===""){$("fr").focus();return}
-E.push({id:Date.now()+"-"+Math.random().toString(36).slice(2,6),date:td(),at:new Date().toISOString(),sim:$("sim").value,type:ty,amount:a,profit:rate(ty,a,fr),frais:ty==="ret"?fr:0,source:"manuel",by:S&&S.e,bn:fullName()});
+E.push({id:Date.now()+"-"+Math.random().toString(36).slice(2,6),date:td(),at:new Date().toISOString(),sim:$("sim").value,type:ty,amount:a,profit:rate(ty,a,fr),frais:ty==="ret"?fr:0,source:"manuel",ref:$("ref").value.trim(),by:S&&S.e,bn:fullName()});
 day=td();mon=td().slice(0,7);
-save();$("amt").value="";$("fr").value="";render();$("amt").focus()};
+save();$("amt").value="";$("fr").value="";$("ref").value="";render();$("amt").focus()};
 $("v1").onclick=function(ev){var id=ev.target.getAttribute("data-id");
-if(id&&confirm("Supprimer cette opération ?")){var d=E.filter(function(e){return e.id===id})[0];if(d&&d.synced){DEL.push(id);persistDel()}E=E.filter(function(e){return e.id!==id});save();render()}};
+var d0=id?E.filter(function(e){return e.id===id})[0]:null;
+if(id&&confirm("Supprimer cette opération ?"+(d0?"\n"+(TN[d0.type]||d0.type)+" · "+d0.sim+" · "+f(d0.amount)+(opRef(d0)?" · Réf "+opRef(d0):""):""))){var d=d0;if(d&&d.synced){DEL.push(id);persistDel()}E=E.filter(function(e){return e.id!==id});save();render()}};
 function tab(n){$("v1").hidden=n!==1;$("v2").hidden=n!==2;$("t1").className=n===1?"on":"";$("t2").className=n===2?"on":""}
 $("t1").onclick=function(){tab(1)};$("t2").onclick=function(){tab(2)};
 function cfgShow(){$("c_mtn").value=C.MTN||"";$("c_moov").value=C.Moov||"";$("c_cel").value=C.Celtis||"";$("c_qd").value=C.q_dep||"";$("c_qr").value=C.q_ret||"";$("c_qc").value=C.q_cred||""}
@@ -663,6 +668,16 @@ $("st").textContent=!S?"🔒 Connectez-vous pour utiliser l’application":"👤
 async function pullC(){var pr=await api("reglages?select=data"),pj=await pr.json();
 if(Array.isArray(pj)&&pj[0]&&pj[0].data&&pj[0].data.t){C=pj[0].data;try{localStorage.setItem(CK,JSON.stringify(C))}catch(e){}cfgShow();render()}}
 async function why(r){var t="";try{t=(await r.text()).slice(0,150)}catch(e){}return "HTTP "+r.status+(t?" : "+t:"")}
+/* Envoie une opération ; si la colonne « ref » n'existe pas encore sur le serveur, on renvoie sans elle (la référence reste affichée sur ce téléphone) */
+async function postOp(e){
+var bd={id:e.id,date:e.date,at:e.at||null,sim:e.sim,type:e.type,amount:e.amount,profit:e.profit,frais:e.frais||0,source:e.source||"manuel",by_name:e.bn||null};
+var hd={Prefer:"resolution=ignore-duplicates,return=minimal"};
+if(e.ref)bd.ref=e.ref;
+var r=await api("operations",{method:"POST",headers:hd,body:JSON.stringify(bd)});
+if(!r.ok&&r.status!==409&&bd.ref&&r.status<500&&r.status!==401){delete bd.ref;r=await api("operations",{method:"POST",headers:hd,body:JSON.stringify(bd)});if(r.ok||r.status===409)refWarn=true}
+return r}
+var refWarn=false,uiSyncRef=uiSync;
+uiSync=function(){uiSyncRef.apply(this,arguments);if(refWarn&&S&&$("st"))$("st").textContent+=" · ⚠️ Réf non enregistrée sur le serveur : exécuter supabase_ref.sql"};
 async function sync(){
 if(busy||!S||!navigator.onLine||!(isOwner()||isEmp())){uiSync();return}
 busy=true;uiSync();
@@ -670,7 +685,7 @@ try{
 for(var i=0;i<DEL.length;i++){var r0=await api("operations?id=eq."+encodeURIComponent(DEL[i]),{method:"DELETE"});if(r0.ok){DEL.splice(i,1);i--}else if(r0.status===401)throw 0}
 persistDel();
 for(var j=0;j<E.length;j++){var e=E[j];if(e.synced)continue;
-var r=await api("operations",{method:"POST",headers:{Prefer:"resolution=ignore-duplicates,return=minimal"},body:JSON.stringify({id:e.id,date:e.date,at:e.at||null,sim:e.sim,type:e.type,amount:e.amount,profit:e.profit,frais:e.frais||0,source:e.source||"manuel",by_name:e.bn||null})});
+var r=await postOp(e);
 if(r.ok||r.status===409)e.synced=true;else{syncMsg="Envoi refusé ("+await why(r)+")";throw 0}}
 persist();
 if(isOwner()){if(!C.t){await pullC()}
@@ -678,7 +693,7 @@ else if(pd){var rp=await api("reglages",{method:"POST",headers:{Prefer:"resoluti
 else await pullC();
 var g=await api("operations?select=*&order=date.desc&limit=1000");var rows=await g.json();
 if(Array.isArray(rows)){var ids={},add=0;E.forEach(function(x){ids[x.id]=1});
-rows.forEach(function(x){if(!ids[x.id]&&DEL.indexOf(x.id)<0){add++;E.push({id:x.id,date:x.date,at:x.at||"",sim:x.sim,type:x.type,amount:Number(x.amount),profit:Number(x.profit),frais:Number(x.frais)||0,source:x.source,by:x.by_email||"",bn:x.by_name||"",synced:true})}});
+rows.forEach(function(x){if(!ids[x.id]&&DEL.indexOf(x.id)<0){add++;E.push({id:x.id,date:x.date,at:x.at||"",sim:x.sim,type:x.type,amount:Number(x.amount),profit:Number(x.profit),frais:Number(x.frais)||0,source:x.source,by:x.by_email||"",bn:x.by_name||"",ref:x.ref||"",synced:true})}});
 if(rows.length<1000){var sid={},n0=E.length;rows.forEach(function(x){sid[x.id]=1});E=E.filter(function(x){return !x.synced||sid[x.id]});if(E.length!==n0)add++}
 if(add)persist();syncErr=false;syncMsg=""}else{syncErr=true;syncMsg="Lecture refusée ("+JSON.stringify(rows).slice(0,150)+")"}
 }catch(err){syncErr=true;if(err!==0)syncMsg="Erreur ("+(err&&err.message||err)+")"}
@@ -1019,9 +1034,9 @@ if(typeof v==="number"&&isFinite(v))x+='<c r="'+ref+'"><v>'+v+'</v></c>';
 else x+='<c r="'+ref+'" t="inlineStr"'+(ri===0?' s="1"':'')+'><is><t xml:space="preserve">'+xe(v)+'</t></is></c>'});
 x+='</row>'});
 return x+'</sheetData></worksheet>'}
-function opsRows(list){var rows=[["Date","Heure","SIM","Opération","Montant (F)","Frais (F)","Bénéfice (F)","Par","Identifiant","Horodatage"]];
+function opsRows(list){var rows=[["Date","Heure","SIM","Opération","Montant (F)","Frais (F)","Bénéfice (F)","Par","Identifiant","Horodatage","Référence"]];
 list.slice().sort(function(a,b){return (a.date+(a.at||"")).localeCompare(b.date+(b.at||""))}).forEach(function(e){
-rows.push([e.date,hh(e),e.sim,TN[e.type==="forf"?"fnet":e.type]||e.type,Number(e.amount)||0,Number(e.frais)||0,Number(e.profit)||0,e.bn||e.by||"",e.id,e.at||""])});return rows}
+rows.push([e.date,hh(e),e.sim,TN[e.type==="forf"?"fnet":e.type]||e.type,Number(e.amount)||0,Number(e.frais)||0,Number(e.profit)||0,e.bn||e.by||"",e.id,e.at||"",opRef(e)])});return rows}
 function dayRows(list){var rows=[["Date","Dépôts (F)","Retraits (F)","Crédit (F)","Forfait internet (F)","Forfait appel (F)","Bénéfice (F)","Nb opérations"]],days={};
 list.forEach(function(e){(days[e.date]=days[e.date]||[]).push(e)});
 Object.keys(days).sort().forEach(function(d){var r=agg(days[d]);rows.push([d,r.dep.a,r.ret.a,r.cred.a,r.fnet.a,r.fapp.a,Math.round(r.p*100)/100,days[d].length])});return rows}
@@ -1032,7 +1047,7 @@ return zipStore([
 ["xl/workbook.xml",u8(H+'<workbook xmlns="'+NS+'" xmlns:r="'+RN+'"><sheets><sheet name="Opérations" sheetId="1" r:id="rId1"/><sheet name="Résumé par jour" sheetId="2" r:id="rId2"/></sheets></workbook>')],
 ["xl/_rels/workbook.xml.rels",u8(H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+RN+'/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="'+RN+'/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="'+RN+'/styles" Target="styles.xml"/></Relationships>')],
 ["xl/styles.xml",u8(H+'<styleSheet xmlns="'+NS+'"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>')],
-["xl/worksheets/sheet1.xml",u8(sheetXml(opsRows(list),[12,8,9,26,13,11,13,20,24,26]))],
+["xl/worksheets/sheet1.xml",u8(sheetXml(opsRows(list),[12,8,9,26,13,11,13,20,24,26,20]))],
 ["xl/worksheets/sheet2.xml",u8(sheetXml(dayRows(list),[12,13,13,12,18,16,13,14]))]])}
 async function unzip(buf){var d=new DataView(buf),u=new Uint8Array(buf),i=u.length-22;
 while(i>=0&&d.getUint32(i,true)!==0x06054b50)i--;if(i<0)throw new Error("zip");
@@ -1070,7 +1085,7 @@ m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(t);if(m)return m[3]+"-"+("0"+m[2]).slice
 var impN=0;
 function rowsToOps(rows){var hd=(rows[0]||[]).map(nrm);
 function ix(){for(var a=0;a<arguments.length;a++){var p=hd.indexOf(arguments[a]);if(p>-1)return p}return -1}
-var cD=ix("date"),cH=ix("heure"),cS=ix("sim"),cT=ix("operation"),cA=ix("montant (f)","montant"),cF=ix("frais (f)","frais"),cP=ix("benefice (f)","benefice"),cB=ix("par"),cI=ix("identifiant","id"),cZ=ix("horodatage");
+var cD=ix("date"),cH=ix("heure"),cS=ix("sim"),cT=ix("operation"),cA=ix("montant (f)","montant"),cF=ix("frais (f)","frais"),cP=ix("benefice (f)","benefice"),cB=ix("par"),cI=ix("identifiant","id"),cZ=ix("horodatage"),cR=ix("reference","ref");
 if(cD<0||cS<0||cT<0||cA<0)return null;
 var T={};Object.keys(TN).forEach(function(k){if(k!=="forf")T[nrm(TN[k])]=k});T["forfait internet"]="fnet";T["forfait appel"]="fapp";
 var ops=[],bad=0,seen={};
@@ -1085,7 +1100,7 @@ if(z&&!isNaN(new Date(z)))at=new Date(z).toISOString();
 else if(cH>-1&&/^\d{1,2}:\d{2}/.test(String(r[cH]||""))){var d2=new Date(date+"T"+("0"+String(r[cH]).split(":")[0]).slice(-2)+":"+String(r[cH]).split(":")[1].slice(0,2)+":00");if(!isNaN(d2))at=d2.toISOString()}
 var id=cI>-1&&String(r[cI]||"").trim()?String(r[cI]).trim():"imp-"+Date.now()+"-"+(++impN);
 if(seen[id])continue;seen[id]=1;
-ops.push({id:id,date:date,at:at,sim:sim,type:ty,amount:amt,profit:pf,frais:ty==="ret"?fr:0,source:"import",by:S&&S.e||"",bn:cB>-1?String(r[cB]||""):"",synced:false})}
+ops.push({id:id,date:date,at:at,sim:sim,type:ty,amount:amt,profit:pf,frais:ty==="ret"?fr:0,source:"import",ref:cR>-1?String(r[cR]==null?"":r[cR]).trim():"",by:S&&S.e||"",bn:cB>-1?String(r[cB]||""):"",synced:false})}
 return{ops:ops,bad:bad}}
 /* ---- Enregistrer le fichier sur le téléphone ---- */
 function b64(u){var s2="",ch=0x8000;for(var i=0;i<u.length;i+=ch)s2+=String.fromCharCode.apply(null,u.subarray(i,i+ch));return btoa(s2)}
@@ -1102,7 +1117,7 @@ async function fullList(){var m={};E.forEach(function(x){m[x.id]=x});
 if(navigator.onLine&&S){try{for(var o=0;o<50000;o+=1000){var ac=new AbortController(),tm=setTimeout(function(){ac.abort()},15000),r;
 try{r=await api("operations?select=*&order=date.asc&limit=1000&offset="+o,{signal:ac.signal})}finally{clearTimeout(tm)}
 var j=await r.json();if(!Array.isArray(j))break;
-j.forEach(function(x){if(!m[x.id]&&DEL.indexOf(x.id)<0)m[x.id]={id:x.id,date:x.date,at:x.at||"",sim:x.sim,type:x.type,amount:Number(x.amount),profit:Number(x.profit),frais:Number(x.frais)||0,source:x.source,by:x.by_email||"",bn:x.by_name||"",synced:true}});
+j.forEach(function(x){if(!m[x.id]&&DEL.indexOf(x.id)<0)m[x.id]={id:x.id,date:x.date,at:x.at||"",sim:x.sim,type:x.type,amount:Number(x.amount),profit:Number(x.profit),frais:Number(x.frais)||0,source:x.source,by:x.by_email||"",bn:x.by_name||"",ref:x.ref||"",synced:true}});
 if(j.length<1000)break}}catch(e){}}
 return Object.keys(m).map(function(k){return m[k]})}
 /* ---- Sauvegarde automatique (23h59, heure du Bénin = UTC+1) ---- */
@@ -1166,6 +1181,9 @@ function smsNum(s){var n=parseInt(String(s||"").replace(/[^\d]/g,""),10);return 
 function smsSim(sender,body){var t=(sender||"")+" "+(body||""),dg=String(body||"").replace(/\D/g,"");
   for(var i=0;i<SIMS.length;i++){var n=EN[SIMS[i]];if(n&&dg.indexOf(n.slice(2))>=0)return SIMS[i]}
   if(/celtis/i.test(t))return"Celtis";if(/moov/i.test(t))return"Moov";if(/mtn|momo/i.test(t))return"MTN";return""}
+/* Référence / ID de la transaction : « ID: 13203308682 », ou « Ref: MP2410.1234 » (au moins un chiffre) */
+function smsRef(b){var m=b.match(/\bID\s*(?:de\s+transaction)?\s*:?\s*(\d{6,})/i)||b.match(/\b(?:ID|r[ée]f(?:[ée]rence)?)\s*:?\s*([A-Za-z]{0,4}\d[A-Za-z0-9._-]{4,})/i);
+  return m?m[1].replace(/[._-]+$/,""):""}
 function smsParse(body,sender){
   var b=String(body||"").replace(/\s+/g," ").trim();if(!b)return null;
   var type="";
@@ -1177,7 +1195,7 @@ function smsParse(body,sender){
   }
   var am=b.match(/(\d[\d\s.]*)\s*F(?:CFA)?\b/i),amount=am?smsNum(am[1]):null;
   var fm=b.match(/frais\s*:?\s*(\d[\d\s.]*)\s*F/i),frais=fm?smsNum(fm[1]):0;
-  var im=b.match(/\bID\s*:?\s*(\d{6,})/i),txid=im?im[1]:"";
+  var txid=smsRef(b);
   var dm=b.match(/(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})/),date="",at="";
   if(dm){date=dm[1];var d=new Date(dm[1]+"T"+dm[2]);at=isNaN(d)?"":d.toISOString()}
   return{type:type,amount:amount,frais:frais||0,txid:txid,date:date,at:at,sim:smsSim(sender,b),raw:b};
@@ -1190,10 +1208,12 @@ function smsSaveSL(){try{localStorage.setItem(SL_KEY,JSON.stringify(SL))}catch(e
 var SMS_OK=false,SMS_TS="cabine_momo_smsts";
 function smsActive(){return isEmp()&&SMS_OK}
 function smsHash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return String(Math.abs(h))}
-function smsMakeOp(p,sim,type,amount,frais){
-  return{id:"sms-"+(p.txid||smsHash(p.raw)),date:p.date||td(),at:p.at||new Date().toISOString(),sim:sim,type:type,amount:amount,
+function smsMakeOp(p,sim,type,amount,frais,ts){
+  var t=Number(ts)||0,dt=p.date&&p.date===td()?p.date:(t?localDay(t):td()),at=p.date&&p.date===td()&&p.at?p.at:(t?new Date(t).toISOString():new Date().toISOString());
+  return{id:(p.txid?"sms-"+p.txid:"smsh-"+smsHash(p.raw)),ref:p.txid||"",date:dt,at:at,sim:sim,type:type,amount:amount,
     profit:rate(type,amount,frais),frais:type==="ret"?frais:0,source:SMS_SOURCE,by:S&&S.e,bn:(fullName()||(S&&S.e)||"Employé")+" · SMS"}}
 function smsAdd(op,bulk){
+  if(op.date!==td())return false;
   if(E.some(function(x){return x.id===op.id})||DEL.indexOf(op.id)>=0)return false;
   E.push(op);if(!bulk){day=op.date;mon=op.date.slice(0,7);save();render()}return true}
 function smsAsk(p){return new Promise(function(res){
@@ -1248,17 +1268,30 @@ function smdAdd(it,p){var ts=Number(it.ts)||Date.now(),d=new Date(ts),ds=d.getFu
   if(r.items.some(function(x){return x.id===id}))return;
   r.items.push({id:id,t:ts,s:String(it.sender||""),b:b.slice(0,300),c:(p&&p.type&&p.amount!=null&&p.sim)?p.sim+" · "+(SN[p.type]||p.type):"",x:it.box==="sent"?1:0});
   if(r.items.length>300)r.items=r.items.slice(-300);smdSave(r)}
+function smdDone(it){var ts=Number(it.ts)||0,id=ts+"|"+smsHash(String(it.body||""));return smdLoad().items.some(function(x){return x.id===id&&x.c})}
 function smdRender(){var b=$("sms_day");if(!b)return;if(!isEmp()){b.innerHTML="";return}
   var r=smdLoad();smdSave(r);
   var its=r.items.slice().sort(function(a,c){return c.t-a.t});
   b.innerHTML='<h2 style="margin-top:12px">Messages du jour ('+its.length+')</h2>'+(its.length?its.map(function(x){var d=new Date(x.t);
     return'<div class="it" style="display:block"><small>'+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+" · "+(x.x?"envoyé à ":"")+esc(x.s)+(x.c?' · <b>'+esc(x.c)+'</b>':" · non classé")+'</small><div style="word-break:break-word">'+esc(x.b)+'</div></div>'}).join(""):'<div class="em">Aucun message aujourd’hui.</div>');}
 setInterval(function(){if(isEmp())smdRender()},30000);
+/* À minuit : nouvelle journée (écran du jour vide, messages du jour effacés, relecture des SMS d'aujourd'hui) */
+var curDay=td();
+function dayRoll(){var t=td();if(t===curDay)return;
+  var wasDay=day===curDay,wasMon=mon===curDay.slice(0,7);curDay=t;
+  if(wasDay)day=t;if(wasMon)mon=t.slice(0,7);
+  try{smdRender()}catch(e){}render();
+  if(isEmp()&&SMSP&&SMS_OK){smsPull();smsHistory()}}
+setInterval(dayRoll,15000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)dayRoll()});
 /* Un SMS lié à un dépôt, retrait ou forfait d'une SIM connue est classé (et envoyé au propriétaire) ; sinon il reste seulement dans « Messages du jour » */
+/* Règle du jour : seuls les SMS d'aujourd'hui (00h00 à 23h59) comptent ; les anciens sont ignorés. Un SMS déjà classé aujourd'hui n'est jamais recréé (même si l'opération a été supprimée). */
 async function smsHandle(it,quiet){
+  var ts=Number(it.ts)||Date.now();if(localDay(ts)!==td())return false;
   var p=smsParse(String(it.body||""),it.sender);if(!p)return false;
+  if(smdDone(it))return false;
   var ok=false;
-  if(p.type&&p.amount!=null&&p.sim)ok=smsAdd(smsMakeOp(p,p.sim,p.type,p.amount,p.frais),quiet);
+  if(p.type&&p.amount!=null&&p.sim)ok=smsAdd(smsMakeOp(p,p.sim,p.type,p.amount,p.frais,ts),quiet);
   try{smdAdd(it,p)}catch(e){}
   return ok}
 /* Employé uniquement : nouveaux SMS reçus pendant que l'application était fermée ou ouverte */
@@ -1275,11 +1308,10 @@ var smsHBusy=false;
 async function smsHistory(){
   if(smsHBusy||!SMSP||!S||!smsActive()||secLocked)return;
   smsHBusy=true;
-  try{var k=SMS_TS+":"+(S.u||S.e),last=0;try{last=Number(localStorage.getItem(k))||0}catch(e){}
-    var now=Date.now(),h=await SMSP.readHistory({since:last?last-86400000:0,limit:3000}),its=(h&&h.items)||[],n=0;
+  try{var m0=new Date();m0.setHours(0,0,0,0);
+    var h=await SMSP.readHistory({since:m0.getTime()-1,limit:1000}),its=(h&&h.items)||[],n=0;
     for(var i=0;i<its.length;i++){try{if(await smsHandle(its[i],true))n++}catch(e){}}
     if(n){save();render()}
-    try{localStorage.setItem(k,String(now))}catch(e){}
     smsRender(n?"✅ "+n+" message(s) SMS lu(s) automatiquement.":null)
   }catch(e){}
   smsHBusy=false}

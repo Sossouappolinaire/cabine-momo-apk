@@ -4,3 +4,6 @@ var m2="Depot recu 1000F de DE STYGO  GEST 1 (2290146255197 - RBCCM/PKO/ 23 A 18
 var m3="Bonjour, rendez-vous demain à 10h";
 var m4="Vous avez achete un forfait internet 2Go pour 1000F. ID: 99887766";
 [m1,m2,m3,m4].forEach(function(m){console.log(JSON.stringify(smsParse(m,"MoMo")));});
+var m5="Retrait de 5000F effectue. Ref: MP2610.1234.A56789 Frais:100F";
+var m6="Transfert 2000F a X le 2026-10-27 08:15:00 Ref: v ID: 13203308999.";
+[m5,m6].forEach(function(m){console.log(JSON.stringify(smsParse(m,"Moov")));});

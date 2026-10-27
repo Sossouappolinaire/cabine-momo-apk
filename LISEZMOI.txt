@@ -37,3 +37,19 @@ SIM et classement (employe)
 
 Parametres : menu a tuiles (une seule fonction affichee a la fois). Boutons : Retour (vers le menu), Accueil, Se deconnecter (sur le menu).
 Le bouton retour d'Android suit le meme chemin : sous-page > menu > accueil.
+
+Journée de 00h00 à 23h59 (mise à jour)
+- Seuls les SMS reçus ou envoyés AUJOURD'HUI créent des opérations. Les anciens SMS du téléphone sont ignorés.
+- À minuit, l'écran "Jour" passe automatiquement à la nouvelle journée (vide) et "Messages du jour" est effacé.
+  Les opérations des jours passés restent dans l'onglet "Mois" et chez le propriétaire.
+- Un SMS déjà classé aujourd'hui n'est jamais recréé, même si l'opération a été supprimée.
+
+Suppression et référence
+- Bouton "Suppr." sur chaque opération du jour (employé et propriétaire), avec confirmation qui rappelle le montant et la référence.
+- Réf (ID de la transaction) : lue dans le SMS ("ID: 13203308682", "Ref: ...") pour dépôt, retrait, forfaits et crédit ;
+  champ facultatif "Réf. / ID de la transaction" pour la saisie manuelle ; colonne "Référence" dans l'export Excel.
+- Pour que la référence soit aussi visible chez le propriétaire (saisie manuelle comprise), exécuter une fois supabase_ref.sql
+  dans Supabase > SQL Editor. Sans cela, l'application continue de fonctionner (références des SMS visibles partout, car contenues dans l'identifiant).
+
+Si la barre du haut affiche "Réf non enregistrée sur le serveur", la colonne ref n'existe pas encore (ou Supabase n'a pas rechargé sa structure) :
+exécutez supabase_ref.sql en entier, puis rouvrez l'application. Les opérations manuelles envoyées avant cela n'ont pas de référence sur le serveur.
