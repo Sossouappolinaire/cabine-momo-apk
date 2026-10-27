@@ -2,9 +2,12 @@ package com.cabine.momo;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.telephony.SmsManager;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,6 +48,9 @@ final class CabineSmsPlugin {
                     break;
                 case "requestPermissions":
                     requestPermissions(c);
+                    break;
+                case "readHistory":
+                    readHistory(c);
                     break;
                 default:
                     c.reject("Méthode inconnue : " + method);
@@ -95,6 +101,38 @@ final class CabineSmsPlugin {
             pendingPerm = null;
         }
         if (c != null) c.resolve(state(granted() ? "granted" : "denied"));
+    }
+
+    /** SMS reçus (type 1) et envoyés (type 2) déjà présents dans le téléphone, du plus récent au plus ancien. */
+    private void readHistory(CabineBridge.Call c) throws Exception {
+        if (act.checkSelfPermission(Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+            c.reject("Autorisation SMS refusée");
+            return;
+        }
+        long since = c.args.optLong("since", 0);
+        int limit = Math.max(1, Math.min(c.args.optInt("limit", 3000), 5000));
+        JSONArray items = new JSONArray();
+        Cursor cur = act.getContentResolver().query(Uri.parse("content://sms"),
+                new String[]{"_id", "address", "body", "date", "type"},
+                "date > ? AND (type = 1 OR type = 2)", new String[]{String.valueOf(since)}, "date DESC");
+        if (cur != null) {
+            try {
+                while (cur.moveToNext() && items.length() < limit) {
+                    JSONObject it = new JSONObject();
+                    it.put("id", "h" + cur.getLong(0));
+                    it.put("sender", cur.getString(1) == null ? "" : cur.getString(1));
+                    it.put("body", cur.getString(2) == null ? "" : cur.getString(2));
+                    it.put("ts", cur.getLong(3));
+                    it.put("box", cur.getInt(4) == 2 ? "sent" : "inbox");
+                    items.put(it);
+                }
+            } finally {
+                cur.close();
+            }
+        }
+        JSONObject r = new JSONObject();
+        r.put("items", items);
+        c.resolve(r);
     }
 
     private void sendCode(CabineBridge.Call c) {

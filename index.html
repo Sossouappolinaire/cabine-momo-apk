@@ -19,7 +19,7 @@
     o.addListener=function(ev,f){(ls[name+":"+ev]=ls[name+":"+ev]||[]).push(f);return Promise.resolve({remove:function(){}})};
     return o}
   window.Capacitor={isNativePlatform:function(){return true},Plugins:{
-    CabineSms:plug("CabineSms",["getPending","ack","sendCode","checkPermissions","requestPermissions"]),
+    CabineSms:plug("CabineSms",["getPending","ack","sendCode","checkPermissions","requestPermissions","readHistory"]),
     Filesystem:plug("Filesystem",["writeFile"]),
     Share:plug("Share",["share"]),
     CabineSecurity:plug("CabineSecurity",["getState","setPin","verifyPin","disablePin","clearPin","setBiometricEnabled","authenticateBiometric"])
@@ -332,6 +332,24 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
 .app-lock-card .lock-secondary{background:transparent;border:0;color:var(--mu);box-shadow:none}
 .security-choice{display:flex;align-items:center;gap:10px;margin:12px 0;padding:13px;border:1px solid var(--bd);border-radius:13px;background:var(--fld);color:var(--tx);font-size:13px}
 .security-choice input{width:18px;min-height:18px;flex:none;margin:0}
+
+#cfg{padding:14px}
+.cfg-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.cfg-head h2{flex:1;margin:0;font-size:18px;text-align:center}
+.cfg-head button{width:auto;flex:none;padding:9px 14px;font-weight:600;border-radius:999px;background:var(--fld)}
+#cfg_menu{display:grid;gap:10px}#cfg_menu[hidden]{display:none}
+.cfg-tile{display:flex;align-items:center;gap:12px;text-align:left;padding:12px;border-radius:16px;background:var(--fld);border:1px solid var(--bd);width:100%}
+.cfg-tile:active{transform:scale(.99)}
+.cfg-ic{flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;background:var(--ac2)}
+.cfg-tx{flex:1;min-width:0}.cfg-tx b{display:block;font-size:15px}.cfg-tx small{display:block;color:var(--mu);font-size:12px;margin-top:2px}
+.cfg-ch{flex:none;font-size:24px;color:var(--mu)}
+.pg-off{display:none!important}
+#cfg>.sep,#cfg [data-pg]>.sep:last-child{display:none}
+#acct>h2:first-child,#security_settings>h2:first-child,#own>h2:first-child,#sim_box>h2:first-child,#sms_box>h2:first-child,#bkp>h2:first-child{display:none}
+#cfg[data-cur]:not([data-cur=""]) #c_out{display:none}
+#c_out{margin-top:16px;color:var(--dg);background:transparent;border:1px solid var(--dg);font-weight:600}
+#sim_list .it>div,#sms_box .it>div:first-child{flex:1;min-width:0}
+#sim_list .it button,#sms_box .it button{width:auto;flex:none;padding:8px 18px}
 </style>
 </head>
 <body>
@@ -345,8 +363,9 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
 <div class="chip" id="st"></div>
 
 <div class="card" id="cfg" hidden>
-  <div class="row" style="align-items:center"><div style="flex:0 0 auto"><button id="c_back">← Retour</button></div><h2 style="margin:0;flex:1;text-align:right">Paramètres</h2></div>
-  <div id="acct" hidden>
+  <div class="cfg-head"><button id="c_back">← Accueil</button><h2 id="cfg_title">Paramètres</h2><button id="c_home" hidden>🏠 Accueil</button></div>
+  <div id="cfg_menu"></div>
+  <div id="acct" hidden data-pg="compte">
     <h2>Mon compte</h2>
     <div class="hint" id="ac_who" style="margin:0 0 8px"></div>
     <div class="row"><div><label>Mot de passe actuel</label><input id="pw_old" type="password" autocomplete="current-password"></div></div>
@@ -362,7 +381,7 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
     </div>
     <div class="sep"></div>
   </div>
-  <section id="security_settings" hidden>
+  <section id="security_settings" hidden data-pg="secu">
     <h2>Verrouillage de l’application</h2>
     <div class="hint" id="sec_status">Le verrouillage est enregistré sur ce téléphone.</div>
     <div id="sec_not_native" class="hint" hidden>Le code PIN et l’empreinte digitale sont disponibles dans l’application Android.</div>
@@ -382,21 +401,31 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
     <div class="hint" id="sec_msg" role="status" aria-live="polite"></div>
     <div class="sep"></div>
   </section>
-  <div id="own">
+  <div id="own" data-pg="cabine">
     <h2>Réglages de la cabine</h2>
     <div class="row"><div><label>Numéro MTN</label><input id="c_mtn" type="tel" inputmode="tel"></div><div><label>Numéro Moov</label><input id="c_moov" type="tel" inputmode="tel"></div></div>
     <div class="row"><div><label>Numéro Celtis</label><input id="c_cel" type="tel" inputmode="tel"></div></div>
-    <div id="sms_box">
-      <h2>Lecture automatique des SMS</h2>
-      <div class="hint" id="sms_state"></div>
-      <div id="sms_sims"></div>
-      <div class="hint" id="sms_msg"></div>
-    </div>
     <div class="row"><div><label>Dépôt : F pour 1000 F</label><input id="c_qd" type="number" step="0.01" min="0" placeholder="3"></div><div><label>Retrait : % des frais</label><input id="c_qr" type="number" step="0.01" min="0" placeholder="47"></div><div><label>Crédit/forfait : F pour 100 F</label><input id="c_qc" type="number" step="0.01" min="0" placeholder="4"></div></div>
     <button class="p" id="c_save">Enregistrer les paramètres</button>
     <div class="sep"></div>
   </div>
-  <div id="empc" hidden>
+  <div id="sim_box" hidden data-pg="sim">
+    <h2>SIM</h2>
+    <div class="row"><div><label>Opérateur</label><select id="sim_op"><option>Moov</option><option>MTN</option><option>Celtis</option></select></div>
+    <div><label>Numéro béninois</label><input id="sim_num" type="tel" inputmode="tel" placeholder="01 97 00 00 00" maxlength="20"></div></div>
+    <button class="p" id="sim_save">Enregistrer</button>
+    <div id="sim_list"></div>
+    <div class="hint" id="sim_msg">Un numéro béninois compte 10 chiffres : 01 + 8 chiffres.</div>
+    <div class="sep"></div>
+  </div>
+  <div id="sms_box" hidden data-pg="sms">
+    <h2>Messages SMS</h2>
+    <div class="it"><div><b>Messages SMS du téléphone</b><small id="sms_state"></small></div><button class="p" id="sms_auth">Autoriser</button></div>
+    <div class="hint" id="sms_msg">Les SMS reçus, envoyés et anciens de la cabine sont lus automatiquement et transmis au propriétaire.</div>
+    <div id="sms_day"></div>
+    <div class="sep"></div>
+  </div>
+  <div id="empc" hidden data-pg="employes">
   <h2>Créer un compte employé</h2>
   <div class="row"><div><label>Prénom</label><input id="e_pn" autocomplete="off"></div><div><label>Nom</label><input id="e_nm" autocomplete="off"></div></div>
   <div class="row"><div><label>E-mail (vide = généré)</label><input id="e_em" type="email" placeholder="généré automatiquement"></div></div>
@@ -407,7 +436,7 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
   <div id="emps"></div>
 </div>
   <div class="sep"></div>
-  <div id="bkp" hidden>
+  <div id="bkp" hidden data-pg="sauv">
     <h2>Sauvegarde et données</h2>
     <label style="display:flex;gap:10px;align-items:center;color:var(--tx);font-size:14px"><input type="checkbox" id="bk_on" style="width:auto"><span>Sauvegarde automatique chaque soir à 23h59 (heure du Bénin)</span></label>
     <div class="hint" id="bk_last"></div>
@@ -417,6 +446,7 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
     <div class="hint">Les fichiers sont enregistrés dans le dossier Documents/CabineMomo du téléphone. La sauvegarde du soir se fait si l’application est ouverte à 23h59, sinon au prochain démarrage.</div>
     <div class="sep"></div>
   </div>
+  <div data-pg="apparence">
   <h2>Fond d’écran</h2>
   <div class="wps" id="wps"></div>
   <div class="row"><button id="wp_pick">Choisir une photo</button><button id="wp_del" hidden>Retirer ma photo</button></div>
@@ -426,6 +456,7 @@ html.lock-checking .app-lock[hidden]{display:grid!important}
   <div class="sep"></div>
   <h2>Apparence</h2>
   <select id="th" aria-label="Apparence"><option value="auto">Automatique (comme le téléphone)</option><option value="light">Clair</option><option value="dark">Sombre</option></select>
+  </div>
   <button id="c_out" style="margin-top:14px" hidden>Se déconnecter</button>
 </div>
 
@@ -538,7 +569,13 @@ if(isOwner())h+='<div class="k big"><small>Bénéfice</small><b>'+f(r.p)+'</b></
 return h+'</div>'}
 function simTable(l){var o=isOwner(),h='<div class="card sc"><h2>Par SIM</h2><table><tr><th>SIM</th><th>Dépôts</th><th>Retraits</th><th>Crédit</th><th>Forfaits</th>'+(o?'<th>Bénéf.</th>':'')+'</tr>';
 SIMS.forEach(function(s){var r=agg(l.filter(function(e){return e.sim===s}));
-h+='<tr><td>'+s+(C[s]?'<br><small style="color:var(--mu)">'+esc(C[s])+'</small>':'')+'</td><td>'+f(r.dep.a)+'</td><td>'+f(r.ret.a)+'</td><td>'+f(r.cred.a)+'</td><td>'+f(r.fnet.a+r.fapp.a)+'</td>'+(o?'<td>'+f(r.p)+'</td>':'')+'</tr>'});
+h+='<tr><td>'+s+(simNum(s)?'<br><small style="color:var(--mu)">'+esc(isEmp()?simFmt(simNum(s)):simNum(s))+'</small>':'')+'</td><td>'+f(r.dep.a)+'</td><td>'+f(r.ret.a)+'</td><td>'+f(r.cred.a)+'</td><td>'+f(r.fnet.a+r.fapp.a)+'</td>'+(o?'<td>'+f(r.p)+'</td>':'')+'</tr>'});
+return h+'</table></div>'}
+function classCard(l){var cols=[["dep","Dépôt"],["ret","Retrait"],["fapp","Forfait appel"],["fnet","Forfait Internet"]];
+var h='<div class="card sc"><h2>Classement par SIM</h2><table><tr><th>SIM</th>'+cols.map(function(c){return'<th>'+c[1]+'</th>'}).join("")+'</tr>';
+["Moov","MTN","Celtis"].forEach(function(sm){h+='<tr><td>'+sm+(simNum(sm)?'<br><small style="color:var(--mu)">'+esc(isEmp()?simFmt(simNum(sm)):simNum(sm))+'</small>':'')+'</td>'+cols.map(function(c){
+var x=l.filter(function(e){return e.sim===sm&&(e.type===c[0]||(c[0]==="fnet"&&e.type==="forf"))}),a=x.reduce(function(t,e){return t+(Number(e.amount)||0)},0);
+return'<td>'+(x.length?x.length+" · "+f(a):"–")+'</td>'}).join("")+'</tr>'});
 return h+'</table></div>'}
 function itemHtml(e,full){var o=isOwner(),w=[f(e.amount)];
 if(o)w.push("bénéfice "+f(e.profit));
@@ -548,7 +585,7 @@ var t=(full?dd(e)+" ":"")+(hh(e)?(full?"à ":"")+hh(e)+" · ":"");
 return '<div class="it"><div><b>'+t+esc(e.sim)+' · '+esc(TN[e.type]||e.type)+'</b><small>'+w.join(" · ")+'</small></div>'+((!full&&(o||!e.synced))?'<button class="x" data-id="'+esc(e.id)+'">Suppr.</button>':'')+'</div>'}
 function render(){var o=isOwner();
 var dl=E.filter(function(e){return e.date===day}).sort(ord);
-var h='<div class="card"><label>Date</label><input type="date" id="dp" value="'+day+'"></div>'+cards(agg(dl))+simTable(dl);
+var h='<div class="card"><label>Date</label><input type="date" id="dp" value="'+day+'"></div>'+cards(agg(dl))+simTable(dl)+classCard(dl);
 h+='<div class="card"><h2>Opérations du jour</h2>';
 if(!dl.length)h+='<div class="em">Aucune opération.</div>';
 dl.forEach(function(e){h+=itemHtml(e,false)});
@@ -1126,7 +1163,8 @@ var SMS_RULES=[
   {re:/^\s*retrait\b/i,type:"ret"}
 ];
 function smsNum(s){var n=parseInt(String(s||"").replace(/[^\d]/g,""),10);return isNaN(n)?null:n}
-function smsSim(sender,body){var t=(sender||"")+" "+(body||"");
+function smsSim(sender,body){var t=(sender||"")+" "+(body||""),dg=String(body||"").replace(/\D/g,"");
+  for(var i=0;i<SIMS.length;i++){var n=EN[SIMS[i]];if(n&&dg.indexOf(n.slice(2))>=0)return SIMS[i]}
   if(/celtis/i.test(t))return"Celtis";if(/moov/i.test(t))return"Moov";if(/mtn|momo/i.test(t))return"MTN";return""}
 function smsParse(body,sender){
   var b=String(body||"").replace(/\s+/g," ").trim();if(!b)return null;
@@ -1149,14 +1187,15 @@ function smsParse(body,sender){
 var SMS_SOURCE="sms",SMSP=null,smsBusy=false,SL_KEY="cabine_momo_simlink",SL={};
 try{SL=JSON.parse(localStorage.getItem(SL_KEY)||"{}")}catch(e){SL={}}
 function smsSaveSL(){try{localStorage.setItem(SL_KEY,JSON.stringify(SL))}catch(e){}}
-function smsActive(){return SIMS.some(function(s){return SL[s]===true})}
+var SMS_OK=false,SMS_TS="cabine_momo_smsts";
+function smsActive(){return isEmp()&&SMS_OK}
 function smsHash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return String(Math.abs(h))}
 function smsMakeOp(p,sim,type,amount,frais){
   return{id:"sms-"+(p.txid||smsHash(p.raw)),date:p.date||td(),at:p.at||new Date().toISOString(),sim:sim,type:type,amount:amount,
-    profit:rate(type,amount,frais),frais:type==="ret"?frais:0,source:SMS_SOURCE,by:S&&S.e,bn:"SMS auto"}}
-function smsAdd(op){
+    profit:rate(type,amount,frais),frais:type==="ret"?frais:0,source:SMS_SOURCE,by:S&&S.e,bn:(fullName()||(S&&S.e)||"Employé")+" · SMS"}}
+function smsAdd(op,bulk){
   if(E.some(function(x){return x.id===op.id})||DEL.indexOf(op.id)>=0)return false;
-  E.push(op);day=op.date;mon=op.date.slice(0,7);save();render();return true}
+  E.push(op);if(!bulk){day=op.date;mon=op.date.slice(0,7);save();render()}return true}
 function smsAsk(p){return new Promise(function(res){
   var w=document.createElement("div");
   w.style.cssText="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px";
@@ -1176,58 +1215,142 @@ function smsAsk(p){return new Promise(function(res){
     if(!(a>=0)||g("sm_am").value===""){g("sm_am").focus();return}
     smsAdd(smsMakeOp(p,g("sm_sim").value,ty,a,fr));w.remove();res(true)};
   g("sm_no").onclick=function(){w.remove();res(false)}})}
-async function smsHandle(it){
-  var body=String(it.body||"");
-  if(SL.pend&&body.indexOf(SL.pend.code)>=0){SL[SL.pend.sim]=true;delete SL.pend;smsSaveSL();smsRender("✅ SIM connectée.");return}
-  var p=smsParse(body,it.sender);if(!p)return;
-  if(p.type&&p.amount!=null&&p.sim){smsAdd(smsMakeOp(p,p.sim,p.type,p.amount,p.frais));return}
-  if(p.amount!=null||/solde|\bID\s*:/i.test(p.raw))await smsAsk(p)}
+/* ---- Numéros SIM de l'employé (numéro béninois : 10 chiffres, préfixe 01) ---- */
+var EN={},SN={dep:"Dépôt",ret:"Retrait",fnet:"Forfait Internet",fapp:"Forfait appel",forf:"Forfait Internet",cred:"Crédit"};
+function simKey(){return"cabine_momo_simnum:"+(S?(S.u||S.e):"")}
+function simLoad(){EN={};try{EN=JSON.parse(localStorage.getItem(simKey())||"{}")||{}}catch(e){EN={}}}
+function simDigits(raw){var t=String(raw||"").trim();
+  if(t.indexOf("+229")===0)t=t.slice(4);else if(t.indexOf("00229")===0)t=t.slice(5);else if(t.indexOf("229")===0&&t.replace(/\D/g,"").length>10)t=t.slice(3);
+  return t.replace(/\D/g,"")}
+function simValid(raw){var d=simDigits(raw);return d.length===10&&d.indexOf("01")===0}
+function simFmt(d){return String(d||"").replace(/(\d{2})(?=\d)/g,"$1 ").trim()}
+function simNum(sm){return isEmp()?(EN[sm]||""):(C[sm]||"")}
+function simRender(msg){var box=$("sim_box");if(!box)return;box.hidden=!isEmp();if(!isEmp())return;
+  $("sim_list").innerHTML=["Moov","MTN","Celtis"].map(function(o){var n=EN[o];
+    return'<div class="it"><div><b>'+o+'</b><small>'+(n?esc(simFmt(n)):"Numéro non renseigné")+'</small></div><button data-sim="'+o+'">'+(n?"Modifier":"Saisir")+'</button></div>'}).join("");
+  if(msg!=null)$("sim_msg").textContent=msg}
+$("sim_op").onchange=function(){$("sim_num").value=EN[this.value]?simFmt(EN[this.value]):""};
+$("sim_list").onclick=function(ev){var o=ev.target.getAttribute("data-sim");if(!o)return;$("sim_op").value=o;$("sim_num").value=EN[o]?simFmt(EN[o]):"";$("sim_num").focus()};
+$("sim_save").onclick=function(){var o=$("sim_op").value,raw=$("sim_num").value,d=simDigits(raw);
+  if(!simValid(raw)){simRender("Numéro béninois invalide : il faut 10 chiffres et commencer par 01 (ex. 01 97 00 00 00).");return}
+  for(var k in EN){if(k!==o&&EN[k]===d){simRender("Ce numéro est déjà enregistré pour "+k+".");return}}
+  EN[o]=d;try{localStorage.setItem(simKey(),JSON.stringify(EN))}catch(e){}
+  var nx=["Moov","MTN","Celtis"].filter(function(x){return!EN[x]})[0];if(nx)$("sim_op").value=nx;
+  $("sim_num").value=nx&&EN[nx]?simFmt(EN[nx]):"";
+  simRender("✅ "+o+" : "+simFmt(d)+(nx?" — choisissez maintenant "+nx+".":" — les 3 SIM sont enregistrées."));render()};
+/* ---- Messages SMS du jour : seulement ceux d'aujourd'hui, effacés à minuit ---- */
+function smdKey(){return"cabine_momo_smsday:"+(S?(S.u||S.e):"")}
+function smdLoad(){var r={d:td(),items:[]};try{var x=JSON.parse(localStorage.getItem(smdKey())||"null");if(x&&x.d===td()&&Array.isArray(x.items))r=x}catch(e){}return r}
+function smdSave(r){try{localStorage.setItem(smdKey(),JSON.stringify(r))}catch(e){}}
+function smdAdd(it,p){var ts=Number(it.ts)||Date.now(),d=new Date(ts),ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  if(ds!==td())return;
+  var r=smdLoad(),b=String(it.body||""),id=ts+"|"+smsHash(b);
+  if(r.items.some(function(x){return x.id===id}))return;
+  r.items.push({id:id,t:ts,s:String(it.sender||""),b:b.slice(0,300),c:(p&&p.type&&p.amount!=null&&p.sim)?p.sim+" · "+(SN[p.type]||p.type):"",x:it.box==="sent"?1:0});
+  if(r.items.length>300)r.items=r.items.slice(-300);smdSave(r)}
+function smdRender(){var b=$("sms_day");if(!b)return;if(!isEmp()){b.innerHTML="";return}
+  var r=smdLoad();smdSave(r);
+  var its=r.items.slice().sort(function(a,c){return c.t-a.t});
+  b.innerHTML='<h2 style="margin-top:12px">Messages du jour ('+its.length+')</h2>'+(its.length?its.map(function(x){var d=new Date(x.t);
+    return'<div class="it" style="display:block"><small>'+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+" · "+(x.x?"envoyé à ":"")+esc(x.s)+(x.c?' · <b>'+esc(x.c)+'</b>':" · non classé")+'</small><div style="word-break:break-word">'+esc(x.b)+'</div></div>'}).join(""):'<div class="em">Aucun message aujourd’hui.</div>');}
+setInterval(function(){if(isEmp())smdRender()},30000);
+/* Un SMS lié à un dépôt, retrait ou forfait d'une SIM connue est classé (et envoyé au propriétaire) ; sinon il reste seulement dans « Messages du jour » */
+async function smsHandle(it,quiet){
+  var p=smsParse(String(it.body||""),it.sender);if(!p)return false;
+  var ok=false;
+  if(p.type&&p.amount!=null&&p.sim)ok=smsAdd(smsMakeOp(p,p.sim,p.type,p.amount,p.frais),quiet);
+  try{smdAdd(it,p)}catch(e){}
+  return ok}
+/* Employé uniquement : nouveaux SMS reçus pendant que l'application était fermée ou ouverte */
 async function smsPull(){
-  if(smsBusy||!SMSP||!S||!(isOwner()||isEmp())||secLocked)return;
+  if(smsBusy||!SMSP||!S||!smsActive()||secLocked)return;
   smsBusy=true;
   try{var r=await SMSP.getPending(),its=(r&&r.items)||[],ids=[];
-    for(var i=0;i<its.length;i++){
-      if(!smsActive()&&!(SL.pend&&String(its[i].body).indexOf(SL.pend.code)>=0))continue;
-      try{await smsHandle(its[i])}catch(e){}
-      ids.push(its[i].id)}
-    if(ids.length)await SMSP.ack({ids:ids})
+    for(var i=0;i<its.length;i++){try{await smsHandle(its[i])}catch(e){}ids.push(its[i].id)}
+    if(ids.length){await SMSP.ack({ids:ids});smsRender()}
   }catch(e){}
   smsBusy=false}
-function smsInit(){SMSP=capP("CabineSms");if(!SMSP){smsRender();return}
+/* Employé uniquement : SMS anciens et SMS envoyés (boîte de réception + messages envoyés du téléphone) */
+var smsHBusy=false;
+async function smsHistory(){
+  if(smsHBusy||!SMSP||!S||!smsActive()||secLocked)return;
+  smsHBusy=true;
+  try{var k=SMS_TS+":"+(S.u||S.e),last=0;try{last=Number(localStorage.getItem(k))||0}catch(e){}
+    var now=Date.now(),h=await SMSP.readHistory({since:last?last-86400000:0,limit:3000}),its=(h&&h.items)||[],n=0;
+    for(var i=0;i<its.length;i++){try{if(await smsHandle(its[i],true))n++}catch(e){}}
+    if(n){save();render()}
+    try{localStorage.setItem(k,String(now))}catch(e){}
+    smsRender(n?"✅ "+n+" message(s) SMS lu(s) automatiquement.":null)
+  }catch(e){}
+  smsHBusy=false}
+async function smsCheck(){SMS_OK=false;
+  if(SMSP){try{var p=await SMSP.checkPermissions();SMS_OK=!!(p&&p.sms==="granted")}catch(e){}}return SMS_OK}
+var smsAsked=false,smsWho="";
+async function smsStart(){
+  if(isEmp()){simLoad();render()}
+  if(!SMSP||!isEmp()){smsRender();return}
+  await smsCheck();
+  if(!SMS_OK&&!smsAsked){smsAsked=true;try{var pr=await SMSP.requestPermissions();SMS_OK=!!(pr&&pr.sms==="granted")}catch(e){}}
+  smsRender();
+  if(SMS_OK){await smsPull();smsHistory()}}
+function smsInit(){SMSP=capP("CabineSms");smsRender();if(!SMSP)return;
   try{SMSP.addListener("smsReceived",function(){smsPull()})}catch(e){}
-  document.addEventListener("visibilitychange",function(){if(!document.hidden)smsPull()});
-  setInterval(smsPull,10000);smsPull();smsRender()}
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)smsCheck().then(function(){smsRender();smsPull();smsHistory()})});
+  setInterval(smsPull,10000);setInterval(smsHistory,300000);smsStart()}
+/* Propriétaire : aucun bloc, aucune autorisation (il lit seulement les opérations envoyées par ses employés) */
 function smsRender(msg){
-  var box=$("sms_sims");if(!box)return;
-  if(!SMSP){box.innerHTML="";$("sms_msg").textContent="Lecture automatique disponible dans l’application Android mise à jour.";return}
-  $("sms_state").textContent=smsActive()?"✅ Lecture automatique active.":"Connectez au moins une SIM pour activer la lecture automatique.";
-  box.innerHTML=SIMS.map(function(s){var n=C[s]||"",ok=SL[s]===true;
-    return'<div class="it"><div><b>'+s+'</b><small>'+(n?esc(n):"Numéro non renseigné")+'</small></div>'+
-    (ok?'<button data-sl="off" data-sim="'+s+'">✅ Déconnecter</button>':'<button class="p" data-sl="on" data-sim="'+s+'"'+(n?"":" disabled")+'>Connecter</button>')+'</div>'}).join("")+
-    (SL.pend?'<div class="row" style="margin-top:8px"><div><label>Code reçu par SMS ('+SL.pend.sim+')</label><input id="sl_code" type="number" inputmode="numeric" placeholder="6 chiffres"></div><div style="flex:0 0 auto;align-self:flex-end"><button class="p" id="sl_ok">Valider</button></div></div>':"");
-  if(msg)$("sms_msg").textContent=msg}
-$("sms_sims").onclick=async function(ev){
-  var t=ev.target,m=t.getAttribute("data-sl"),sim=t.getAttribute("data-sim");
-  if(t.id==="sl_ok"){var v=($("sl_code").value||"").trim();
-    if(SL.pend&&v===SL.pend.code){SL[SL.pend.sim]=true;delete SL.pend;smsSaveSL();smsRender("✅ SIM connectée.");smsPull()}
-    else $("sms_msg").textContent="Code incorrect.";return}
-  if(m==="off"){delete SL[sim];smsSaveSL();smsRender("SIM déconnectée.");return}
-  if(m!=="on"||!SMSP)return;
-  var num=(C[sim]||"").trim();if(!num){$("sms_msg").textContent="Enregistrez d’abord le numéro de la SIM.";return}
-  try{var pr=await SMSP.requestPermissions();
-    if(pr&&pr.sms&&pr.sms!=="granted"){$("sms_msg").textContent="Autorisation SMS refusée.";return}
-    var code=String(100000+Math.floor(Math.random()*900000));
-    await SMSP.sendCode({to:num,code:code});
-    SL.pend={sim:sim,code:code};smsSaveSL();smsRender("Code envoyé au "+num+". Il se validera tout seul à sa réception.")}
-  catch(e){$("sms_msg").textContent="Échec : "+((e&&e.message)||"envoi impossible")}};
-var smsCfgShow=cfgShow;cfgShow=function(){smsCfgShow();smsRender()};
+  simRender();try{if(inCfg&&!cfgCur)cfgMenu()}catch(e){}
+  var box=$("sms_box");if(!box)return;
+  box.hidden=!isEmp();if(!isEmp())return;
+  smdRender();
+  var st=$("sms_state"),bt=$("sms_auth");
+  if(!SMSP){st.textContent="Disponible dans l’application Android mise à jour.";bt.hidden=true;return}
+  st.textContent=SMS_OK?"Autorisé":"Non autorisées";st.style.color=SMS_OK?"#0a7d4b":"#c0392b";
+  bt.hidden=SMS_OK;
+  if(msg!=null)$("sms_msg").textContent=msg}
+$("sms_auth").onclick=async function(){if(!SMSP)return;
+  try{var pr=await SMSP.requestPermissions();SMS_OK=!!(pr&&pr.sms==="granted")}catch(e){}
+  smsRender(SMS_OK?"Messages SMS autorisés.":"Non autorisées : ouvrez Android > Applications > Cabine Momo > Autorisations > SMS.");
+  if(SMS_OK){smsPull();smsHistory()}};
+var smsCfgShow=cfgShow;cfgShow=function(){smsCfgShow();smsCheck().then(function(){smsRender()})};
 /* ---- Bouton « Déconnecter tous les comptes » ---- */
-function allOutShow(){var w=$("allout_w");if(w)w.hidden=!(S||smsActive()||SL.pend)}
+function allOutShow(){var w=$("allout_w");if(w)w.hidden=!S}
 $("allout").onclick=async function(){
-  if(!confirm("Déconnecter tous les comptes de ce téléphone ?\n\n• la session de l’application\n• toutes les SIM connectées pour la lecture des SMS"))return;
+  if(!confirm("Déconnecter le compte de ce téléphone ?"))return;
   if(S){await logout();if(S)return}
-  SL={};smsSaveSL();smsRender("Toutes les SIM sont déconnectées.");allOutShow()};
-var uiSyncBase=uiSync;uiSync=function(){uiSyncBase.apply(this,arguments);allOutShow()};
+  allOutShow()};
+var uiSyncBase=uiSync;uiSync=function(){uiSyncBase.apply(this,arguments);allOutShow();var w=isEmp()?(S.u||S.e):"";if(w!==smsWho){smsWho=w;smsStart()}};
+
+/* ---- Paramètres : un menu, une seule fonction affichée à la fois ---- */
+var cfgCur="";
+var CFG_PGS=[
+ {k:"compte",ic:"👤",t:"Mon compte",s:"Mot de passe et e-mail",ok:function(){return!!S}},
+ {k:"secu",ic:"🔒",t:"Verrouillage",s:"Code PIN et empreinte",ok:function(){return!!S}},
+ {k:"cabine",ic:"🏪",t:"Réglages de la cabine",s:"Numéros et tarifs",ok:function(){return isOwner()}},
+ {k:"employes",ic:"👥",t:"Employés",s:"Créer et gérer les comptes",ok:function(){return isOwner()}},
+ {k:"sauv",ic:"💾",t:"Sauvegarde et données",s:"Export et import Excel",ok:function(){return isOwner()}},
+ {k:"sim",ic:"📶",t:"SIM",s:function(){return Object.keys(EN||{}).length+"/3 numéros enregistrés"},ok:function(){return isEmp()}},
+ {k:"sms",ic:"💬",t:"Messages SMS",s:function(){return SMSP?(SMS_OK?"Autorisé":"Non autorisées"):"Application Android requise"},ok:function(){return isEmp()}},
+ {k:"apparence",ic:"🎨",t:"Apparence",s:"Fond d’écran et thème",ok:function(){return true}}];
+function cfgMenu(){var m=$("cfg_menu");if(!m)return;
+  m.innerHTML=CFG_PGS.filter(function(g){return g.ok()}).map(function(g){var sub=typeof g.s==="function"?g.s():g.s;
+    return'<button class="cfg-tile" data-go="'+g.k+'"><span class="cfg-ic">'+g.ic+'</span><span class="cfg-tx"><b>'+g.t+'</b><small>'+esc(sub)+'</small></span><span class="cfg-ch">›</span></button>'}).join("")}
+function cfgPage(k){cfgCur=k||"";
+  var pg=document.querySelectorAll("#cfg [data-pg]");
+  for(var i=0;i<pg.length;i++)pg[i].classList.toggle("pg-off",pg[i].getAttribute("data-pg")!==cfgCur);
+  var g=CFG_PGS.filter(function(x){return x.k===cfgCur})[0];
+  $("cfg").setAttribute("data-cur",cfgCur);$("cfg_menu").hidden=!!cfgCur;
+  $("cfg_title").textContent=g?g.t:"Paramètres";
+  $("c_back").textContent=cfgCur?"‹ Paramètres":"← Accueil";$("c_home").hidden=!cfgCur;
+  if(!cfgCur)cfgMenu();
+  window.scrollTo(0,0)}
+$("cfg_menu").onclick=function(ev){var b=ev.target.closest?ev.target.closest("[data-go]"):null;if(b)cfgPage(b.getAttribute("data-go"))};
+$("c_back").onclick=function(){if(cfgCur)cfgPage("");else openCfg(false)};
+$("c_home").onclick=function(){openCfg(false)};
+var openCfgBase=openCfg;openCfg=function(on){openCfgBase(on);if(on)cfgPage("");var w=$("allout_w");if(w)w.style.display=inCfg?"none":""};
+var cfgShowBase=cfgShow;cfgShow=function(){cfgShowBase();if(!cfgCur)cfgMenu()};
+window.__cabineBack=function(){if(inCfg){if(cfgCur)cfgPage("");else openCfg(false);return true}return false};
+cfgPage("");
 
 wpInit();thInit();cfgShow();bkShow();uiSync();sync();render();bkCheck();secInit();smsInit();
 </script>

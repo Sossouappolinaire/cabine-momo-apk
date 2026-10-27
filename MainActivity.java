@@ -135,7 +135,17 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        moveTaskToBack(true);
+        if (web == null) {
+            moveTaskToBack(true);
+            return;
+        }
+        web.evaluateJavascript("(function(){try{return window.__cabineBack&&window.__cabineBack()?'1':'0'}catch(e){return '0'}})()",
+                new android.webkit.ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String v) {
+                        if (v == null || !v.contains("1")) moveTaskToBack(true);
+                    }
+                });
     }
 
     @Override

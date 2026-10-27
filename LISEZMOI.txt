@@ -24,3 +24,16 @@ Compiler sur github.com
 Bouton rouge "Deconnecter tous les comptes"
 Petit bouton rouge tout en bas de l'ecran, visible seulement si un compte ou une SIM est connecte.
 Il deconnecte la session de l'application et toutes les SIM de la lecture des SMS.
+
+Messages SMS : propriétaire et employé
+- Propriétaire : aucun écran d'autorisation SMS. Il lit seulement les operations (depots, retraits, forfaits) envoyees par ses employes.
+- Employé : Parametres > Messages SMS affiche "Autorise" ou "Non autorisees" (bouton Autoriser). Une fois autorise, l'application lit
+  automatiquement les SMS recus, envoyes et anciens du telephone (CabineSmsPlugin.readHistory) ; les operations sont envoyees au proprietaire.
+
+SIM et classement (employe)
+- Parametres > SIM : liste Moov / MTN / Celtis, saisie du numero beninois (10 chiffres, prefixe 01), enregistrement, modification possible.
+- Un SMS de depot, retrait ou forfait (appel / Internet) est classe par SIM (numero de la SIM, sinon nom de l'operateur) et envoye au proprietaire.
+- Les autres SMS ne sont pas classes : ils restent dans Parametres > Messages SMS, uniquement ceux du jour, effaces a minuit.
+
+Parametres : menu a tuiles (une seule fonction affichee a la fois). Boutons : Retour (vers le menu), Accueil, Se deconnecter (sur le menu).
+Le bouton retour d'Android suit le meme chemin : sous-page > menu > accueil.
